@@ -1,7 +1,7 @@
 import express from "express";
-import fornecedorRoute from "./routes/fornecedor";
-import cndtypeRoute from "./routes/cndtype";
-import cndRoute from "./routes/cnd";
+import fornecedorRoute from "./routes/fornecedor.js";
+import cndtypeRoute from "./routes/cndtype.js";
+import cndRoute from "./routes/cnd.js";
 
 
 var app = express();

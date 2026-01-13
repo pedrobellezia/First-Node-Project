@@ -1,6 +1,6 @@
 import { Router } from "express";
-import FornecedorManager from "../controllers/fornecedor";
-import { getFornecedor, newFornecedor } from "../lib/schemas";
+import FornecedorManager from "../controllers/fornecedor.js";
+import { getFornecedor, newFornecedor } from "../lib/schemas.js";
 
 const fornecedorRoute = Router();
 

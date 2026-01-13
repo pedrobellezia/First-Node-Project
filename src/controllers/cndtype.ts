@@ -1,5 +1,5 @@
 import { promises } from "node:dns";
-import { prisma } from "../lib/prisma";
+import { prisma } from "../lib/prisma.js";
 
 class CndTypeManager {
   static async newCndType(

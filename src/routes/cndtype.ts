@@ -1,6 +1,6 @@
 import { Router } from "express";
-import CndTypeManager from "../controllers/cndtype";
-import { newCndType, getCndType } from "../lib/schemas";
+import CndTypeManager from "../controllers/cndtype.js";
+import { newCndType, getCndType } from "../lib/schemas.js";
 
 const cndtypeRoute = Router();
 

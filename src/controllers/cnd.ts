@@ -1,8 +1,8 @@
 import { Router } from "express";
-import { prisma } from "../lib/prisma";
-import getCndfromApi from "../lib/call_cnd_api";
-import FornecedorManager from "../controllers/fornecedor";
-import CndTypeManager from "../controllers/cndtype";
+import { prisma } from "../lib/prisma.js";
+import getCndfromApi from "../lib/call_cnd_api.js";
+import FornecedorManager from "../controllers/fornecedor.js";
+import CndTypeManager from "../controllers/cndtype.js";
 
 const cndRoute = Router();
 

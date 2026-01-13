@@ -54,6 +54,6 @@ const getCndType = z
     id: z.string(),
   })
   .partial()
-  .strict();
+.strict();
 
 export { newCnd, getCnd, newFornecedor, getFornecedor, newCndType, getCndType };
