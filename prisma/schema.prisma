@@ -1,0 +1,39 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Fornecedor {
+  id             String          @id @default(uuid())
+  cnpj           String          @unique
+  name           String
+  uf             String?
+  municipio      String?
+  ativo          Boolean         @default(true)
+  fornecedorCnds FornecedorCnd[]
+}
+
+model CndType {
+  id             String          @id @default(uuid())
+  uf             String?
+  municipio      String?
+  tipo           String
+  instructions   Json
+  ativo          Boolean         @default(true)
+  fornecedorCnds FornecedorCnd[]
+}
+
+model FornecedorCnd {
+  id           String  @id @default(uuid())
+  fornecedorid String
+  cndtypeid    String
+  file_name    String
+  ativo        Boolean @default(true)
+
+  Fornecedor Fornecedor @relation(fields: [fornecedorid], references: [id])
+  CndType    CndType    @relation(fields: [cndtypeid], references: [id])
+}
