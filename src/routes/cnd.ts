@@ -9,34 +9,40 @@ import CndManager from "../controllers/cnd.js";
 const cndRoute = Router();
 
 cndRoute.post("", async (req, res) => {
-  let reqData = await newCnd.safeParseAsync(req.body);
+  let data = await newCnd.safeParseAsync(req.body);
 
-  if (!reqData.success || reqData.data === undefined) {
-    res.send(reqData.error.issues);
+  if (!data.success) {
+    res.json({
+      success: false,
+      data: data.error.issues,
+    });
     return;
   }
 
   const response = await CndManager.newCnd(
-    reqData.data.fornecedorid,
-    reqData.data.cndtypeid
+    data.data.fornecedorid,
+    data.data.cndtypeid
   );
-  
+
   res.send(response);
 });
 
 cndRoute.get("", async (req, res) => {
-  let reqData = await getCnd.safeParseAsync(req.body);
+  let data = await getCnd.safeParseAsync(req.query);
 
-  if (!reqData.success) {
-    res.send(reqData.error.issues);
+  if (!data.success) {
+    res.json({
+      success: false,
+      data: data.error.issues,
+    });
     return;
   }
 
   res.send(
     await CndManager.getCnd(
-      reqData.data.id,
-      reqData.data.fornecedorid,
-      reqData.data.cndtypeid
+      data.data.id,
+      data.data.fornecedorid,
+      data.data.cndtypeid
     )
   );
 });

@@ -8,7 +8,10 @@ cndtypeRoute.post("", async (req, res) => {
   let data = await newCndType.safeParseAsync(req.body);
 
   if (!data.success) {
-    res.send(data.error.issues);
+    res.json({
+      success: false,
+      data: data.error.issues,
+    });
     return;
   }
 
@@ -26,10 +29,13 @@ cndtypeRoute.post("", async (req, res) => {
 });
 
 cndtypeRoute.get("", async (req, res) => {
-  let data = await getCndType.safeParseAsync(req.body);
+  let data = await getCndType.safeParseAsync(req.query);
 
   if (!data.success) {
-    res.send(data.error.issues);
+    res.json({
+      success: false,
+      data: data.error.issues,
+    });
     return;
   }
 

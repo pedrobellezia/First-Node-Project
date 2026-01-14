@@ -1,6 +1,7 @@
 import { Router } from "express";
 import FornecedorManager from "../controllers/fornecedor.js";
 import { getFornecedor, newFornecedor } from "../lib/schemas.js";
+import { success } from "zod";
 
 const fornecedorRoute = Router();
 
@@ -8,9 +9,13 @@ fornecedorRoute.post("", async (req, res) => {
   let data = await newFornecedor.safeParseAsync(req.body);
 
   if (!data.success) {
-    res.send(data.error.issues);
+    res.json({
+      success: false,
+      data: data.error.issues,
+    });
     return;
   }
+
   // data.data pode ser undefined mas eu ja tomei conta dessa possibilidade na linha 10-12
 
   const fornecedor = await FornecedorManager.newFornecedor(
@@ -23,10 +28,13 @@ fornecedorRoute.post("", async (req, res) => {
 });
 
 fornecedorRoute.get("", async (req, res) => {
-  let data = await getFornecedor.safeParseAsync(req.body);
+  let data = await getFornecedor.safeParseAsync(req.query);
 
   if (!data.success) {
-    res.send(data.error.issues);
+    res.json({
+      success: false,
+      data: data.error.issues,
+    });
     return;
   }
   const fornecedor = await FornecedorManager.getFornecedor(
