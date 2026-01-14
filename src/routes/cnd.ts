@@ -23,8 +23,11 @@ cndRoute.post("", async (req, res) => {
     data.data.fornecedorid,
     data.data.cndtypeid
   );
-
-  res.send(response);
+ 
+  res.json({
+    success: true,
+    data: response,
+  });
 });
 
 cndRoute.get("", async (req, res) => {
@@ -38,13 +41,17 @@ cndRoute.get("", async (req, res) => {
     return;
   }
 
-  res.send(
-    await CndManager.getCnd(
-      data.data.id,
-      data.data.fornecedorid,
-      data.data.cndtypeid
-    )
+  const response = await CndManager.getCnd(
+    data.data.id,
+    data.data.fornecedorid,
+    data.data.cndtypeid
   );
+  
+  res.json({
+    success: true,
+    data: response,
+  });
+  
 });
 
 export default cndRoute;

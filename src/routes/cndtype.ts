@@ -23,8 +23,9 @@ cndtypeRoute.post("", async (req, res) => {
     data.data.instructions
   );
 
-  res.send({
-    cnd: cnd,
+  res.json({
+    success: true,
+    data: cnd,
   });
 });
 
@@ -45,8 +46,9 @@ cndtypeRoute.get("", async (req, res) => {
     data.data.municipio,
     data.data.tipo
   );
-  res.send({
-    cnd: cnd,
+  res.json({
+    success: true,
+    data: cnd,
   });
 });
 

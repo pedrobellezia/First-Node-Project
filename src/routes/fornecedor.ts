@@ -37,6 +37,7 @@ fornecedorRoute.get("", async (req, res) => {
     });
     return;
   }
+
   const fornecedor = await FornecedorManager.getFornecedor(
     data.data.id,
     data.data.uf,
@@ -45,7 +46,7 @@ fornecedorRoute.get("", async (req, res) => {
     data.data.cnpj
   );
 
-  res.send(fornecedor);
+  res.json({ success: true, data: fornecedor });
 });
 
 export default fornecedorRoute;
