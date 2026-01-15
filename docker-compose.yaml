@@ -1,6 +1,6 @@
 services:
   api:
-    container_name: node-pedrobs-container
+    container_name: cnd-api
     build: .
     ports:
       - "2556:3000"
