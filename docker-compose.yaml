@@ -3,7 +3,7 @@ services:
     container_name: cnd-api
     build: .
     ports:
-      - "2556:3000"
+      - "3000:3000"
     environment:
       DATABASE_URL: ${DATABASE_URL}
       CND_API_URL: ${CND_API_URL}
