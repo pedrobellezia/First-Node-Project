@@ -4,12 +4,35 @@ import getCndfromApi from "../lib/call_cnd_api.js";
 import FornecedorManager from "../controllers/fornecedor.js";
 import CndTypeManager from "../controllers/cndtype.js";
 
+interface Prop {
+  id?: string;
+  Fornecedor?: {
+    ativo?: boolean;
+    id?: string;
+    name?: string;
+    cnpj?: string;
+    uf?: string;
+    municipio?: string;
+  };
+  CndType?: {
+    ativo?: boolean;
+    id?: string;
+    tipo?: string;
+    uf?: string;
+    municipio?: string;
+  };
+  include?: {
+    Fornecedor: boolean;
+    CndType: boolean;
+  };
+}
+
 const cndRoute = Router();
 
 class CndManager {
   static async newCnd(fornecedorid: string, cndtypeid: string) {
-    const fornecedor = await FornecedorManager.getFornecedor(fornecedorid);
-    const cndtype = await CndTypeManager.getCndType(cndtypeid);
+    const fornecedor = await FornecedorManager.getFornecedor({id: fornecedorid});
+    const cndtype = await CndTypeManager.getCndType({id: cndtypeid});
 
     if (!fornecedor.length || !cndtype.length) {
       return;
@@ -21,7 +44,6 @@ class CndManager {
       cndtype[0].uf,
       cndtype[0].municipio
     );
-
 
     if (response.status_code === 200) {
       const file_name = response.details.files_saved[0];
@@ -38,14 +60,15 @@ class CndManager {
     }
   }
 
-  static async getCnd(id?: string, cndtypeid?: string, fornecedorid?: string) {
+  static async getCnd(prop: Prop) {
     return await prisma.fornecedorCnd.findMany({
       where: {
         ativo: true,
-        ...(id && { id: id }),
-        ...(cndtypeid && { cndtypeid: cndtypeid }),
-        ...(fornecedorid && { fornecedorid: fornecedorid }),
+        ...(prop.id && {id: prop.id}),
+        ...(prop.CndType && { CndType: { is: {...prop.CndType, ativo:true} } }),
+        ...(prop.Fornecedor && { Fornecedor: { is: {...prop.Fornecedor, ativo:true} } }),
       },
+      ...(prop.include && { include: prop.include }),
     });
   }
 }

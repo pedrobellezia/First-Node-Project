@@ -41,11 +41,7 @@ cndRoute.get("", async (req, res) => {
     return;
   }
 
-  const response = await CndManager.getCnd(
-    data.data.id,
-    data.data.fornecedorid,
-    data.data.cndtypeid
-  );
+  const response = await CndManager.getCnd(data.data);
   
   res.json({
     success: true,

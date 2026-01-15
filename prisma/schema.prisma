@@ -6,6 +6,7 @@ datasource db {
   provider = "postgresql"
 }
 
+
 model Fornecedor {
   id             String          @id @default(uuid())
   cnpj           String          @unique
@@ -13,7 +14,7 @@ model Fornecedor {
   uf             String?
   municipio      String?
   ativo          Boolean         @default(true)
-  fornecedorCnds FornecedorCnd[]
+  FornecedorCnds FornecedorCnd[]
 }
 
 model CndType {
@@ -23,7 +24,7 @@ model CndType {
   tipo           String
   instructions   Json
   ativo          Boolean         @default(true)
-  fornecedorCnds FornecedorCnd[]
+  FornecedorCnds FornecedorCnd[]
 }
 
 model FornecedorCnd {

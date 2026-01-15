@@ -1,5 +1,11 @@
-import { promises } from "node:dns";
 import { prisma } from "../lib/prisma.js";
+
+interface Prop {
+  id?: string;
+  uf?: string;
+  municipio?: string;
+  tipo?: string;
+}
 
 class CndTypeManager {
   static async newCndType(
@@ -19,19 +25,11 @@ class CndTypeManager {
     return cndType;
   }
 
-  static async getCndType(
-    id?: string,
-    uf?: string,
-    municipio?: string,
-    tipo?: string
-  ): Promise<any[]> {
+  static async getCndType(prop: Prop): Promise<any[]> {
     const cndType = await prisma.cndType.findMany({
       where: {
         ativo: true,
-        ...(id && { id: id }),
-        ...(uf && { uf: uf }),
-        ...(municipio && { municipio: municipio }),
-        ...(tipo && { tipo: tipo }),
+        ...prop
       },
     });
     return cndType;

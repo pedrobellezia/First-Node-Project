@@ -1,7 +1,6 @@
 import { Router } from "express";
 import FornecedorManager from "../controllers/fornecedor.js";
 import { getFornecedor, newFornecedor } from "../lib/schemas.js";
-import { success } from "zod";
 
 const fornecedorRoute = Router();
 
@@ -28,7 +27,9 @@ fornecedorRoute.post("", async (req, res) => {
 });
 
 fornecedorRoute.get("", async (req, res) => {
+  console.log(req.query);
   let data = await getFornecedor.safeParseAsync(req.query);
+  console.log(data);
 
   if (!data.success) {
     res.json({
@@ -38,13 +39,7 @@ fornecedorRoute.get("", async (req, res) => {
     return;
   }
 
-  const fornecedor = await FornecedorManager.getFornecedor(
-    data.data.id,
-    data.data.uf,
-    data.data.municipio,
-    data.data.name,
-    data.data.cnpj
-  );
+  const fornecedor = await FornecedorManager.getFornecedor(data.data);
 
   res.json({ success: true, data: fornecedor });
 });

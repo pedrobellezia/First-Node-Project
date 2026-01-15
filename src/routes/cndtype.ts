@@ -15,7 +15,6 @@ cndtypeRoute.post("", async (req, res) => {
     return;
   }
 
-  // data.data pode ser undefined mas eu ja tomei conta dessa possibilidade na linha 10-12
   const cnd = await CndTypeManager.newCndType(
     data.data.uf,
     data.data.municipio,
@@ -29,7 +28,8 @@ cndtypeRoute.post("", async (req, res) => {
   });
 });
 
-cndtypeRoute.get("", async (req, res) => {
+cndtypeRoute.get("", async (req, res) => {    
+
   let data = await getCndType.safeParseAsync(req.query);
 
   if (!data.success) {
@@ -40,12 +40,7 @@ cndtypeRoute.get("", async (req, res) => {
     return;
   }
 
-  const cnd = await CndTypeManager.getCndType(
-    data.data.id,
-    data.data.uf,
-    data.data.municipio,
-    data.data.tipo
-  );
+  const cnd = await CndTypeManager.getCndType(data.data);
   res.json({
     success: true,
     data: cnd,
