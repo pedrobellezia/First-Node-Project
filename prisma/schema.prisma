@@ -6,7 +6,6 @@ datasource db {
   provider = "postgresql"
 }
 
-
 model Fornecedor {
   id             String          @id @default(uuid())
   cnpj           String          @unique
@@ -14,6 +13,7 @@ model Fornecedor {
   uf             String?
   municipio      String?
   ativo          Boolean         @default(true)
+  createdAt      DateTime        @default(now()) @db.Timestamp(6)
   FornecedorCnds FornecedorCnd[]
 }
 
@@ -24,15 +24,18 @@ model CndType {
   tipo           String
   instructions   Json
   ativo          Boolean         @default(true)
+  createdAt      DateTime        @default(now()) @db.Timestamp(6)
   FornecedorCnds FornecedorCnd[]
 }
 
 model FornecedorCnd {
-  id           String  @id @default(uuid())
+  id           String   @id @default(uuid())
   fornecedorid String
   cndtypeid    String
   file_name    String
-  ativo        Boolean @default(true)
+  validade     DateTime @db.Date
+  ativo        Boolean  @default(true)
+  createdAt    DateTime @default(now()) @db.Timestamp(6)
 
   Fornecedor Fornecedor @relation(fields: [fornecedorid], references: [id])
   CndType    CndType    @relation(fields: [cndtypeid], references: [id])

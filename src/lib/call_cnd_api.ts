@@ -1,6 +1,7 @@
-import axios from "axios";
 import { prisma } from "./prisma.js";
-import dotenv from "dotenv";
+import fs from "fs";
+import path from "path";
+import api from "./axios.js";
 
 type CndTipo = "municipal" | "estadual" | "fgts" | "trabalhista";
 
@@ -31,7 +32,6 @@ async function getCndfromApi(
   uf?: string,
   municipio?: string
 ): Promise<ApiResponse> {
-  
   const filter: CndFilter = {
     tipo,
     ...(tipo === "municipal" && { uf, municipio }),
@@ -50,11 +50,22 @@ async function getCndfromApi(
     .replace("%CNPJ%", cnpj)
     .replace("%API_KEY%", process.env.CAPTCHA_API_KEY!);
 
-  const response = await axios.post(process.env.CND_API_URL!, instructions);
+  const { data, status } = await api.post("/execute_scrap", instructions);
+
+  const fileResponse = await api.get(`/cnd/${data.files_saved[0].path}`, {
+    responseType: "arraybuffer",
+  });
+
+  const pdfBuffer = Buffer.from(fileResponse.data);
+  const fileName = path.basename(data.files_saved[0].path);
+  const outputPath = path.resolve("public", fileName);
+
+  fs.writeFileSync(outputPath, pdfBuffer);
+
   return {
-    status_code: response.status,
+    status_code: status,
     message: "Success",
-    details: response.data,
+    details: data,
   };
 }
 

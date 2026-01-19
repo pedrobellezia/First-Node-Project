@@ -24,3 +24,6 @@ prisma/generated/
 .prisma/client/
 .prisma/migrations/
 .prisma/dev.db
+
+# Public
+/public/*

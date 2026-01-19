@@ -1,11 +1,6 @@
 import { prisma } from "../lib/prisma.js";
-
-interface Prop {
-  id?: string;
-  uf?: string;
-  municipio?: string;
-  tipo?: string;
-}
+import * as z from "zod";
+import { queryCndType } from "../schemas/cndtype.js";
 
 class CndTypeManager {
   static async newCndType(
@@ -25,12 +20,13 @@ class CndTypeManager {
     return cndType;
   }
 
-  static async getCndType(prop: Prop): Promise<any[]> {
+  static async getCndType(prop: z.infer<typeof queryCndType>): Promise<any[]> {
     const cndType = await prisma.cndType.findMany({
-      where: {
-        ativo: true,
-        ...prop
-      },
+      ...(prop.where && { where: prop.where }),
+      ...(prop.orderBy && { orderBy: prop.orderBy }),
+      ...(prop.include && { include: prop.include }),
+      ...(prop.limit && { take: prop.limit }),
+      ...(prop.page && { skip: (prop.page - 1) * prop.limit! }),
     });
     return cndType;
   }

@@ -1,6 +1,6 @@
 import { Router } from "express";
 import CndTypeManager from "../controllers/cndtype.js";
-import { newCndType, getCndType } from "../lib/schemas.js";
+import { newCndType, queryCndType } from "../schemas/cndtype.js";
 
 const cndtypeRoute = Router();
 
@@ -28,9 +28,8 @@ cndtypeRoute.post("", async (req, res) => {
   });
 });
 
-cndtypeRoute.get("", async (req, res) => {    
-
-  let data = await getCndType.safeParseAsync(req.query);
+cndtypeRoute.get("", async (req, res) => {
+  let data = await queryCndType.safeParseAsync(req.query);
 
   if (!data.success) {
     res.json({

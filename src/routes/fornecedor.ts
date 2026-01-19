@@ -1,6 +1,6 @@
 import { Router } from "express";
 import FornecedorManager from "../controllers/fornecedor.js";
-import { getFornecedor, newFornecedor } from "../lib/schemas.js";
+import { newFornecedor, queryFornecedor } from "../schemas/fornecedor.js";
 
 const fornecedorRoute = Router();
 
@@ -28,7 +28,7 @@ fornecedorRoute.post("", async (req, res) => {
 
 fornecedorRoute.get("", async (req, res) => {
   console.log(req.query);
-  let data = await getFornecedor.safeParseAsync(req.query);
+  let data = await queryFornecedor.safeParseAsync(req.query);
   console.log(data);
 
   if (!data.success) {
