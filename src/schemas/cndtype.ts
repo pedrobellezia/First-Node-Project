@@ -3,6 +3,7 @@ import {
   orderByFornecedorCnds,
   whereFornecedorCnds,
 } from "./fornecedorCnds.js";
+
 const whereCndType = z
   .object({
     ativo: z
@@ -25,19 +26,32 @@ const orderByCndType = z.object({
 });
 
 const includeCnd = z.object({
-  FornecedorCnds: z.object({
-    where: whereFornecedorCnds,
-    orderBy: orderByFornecedorCnds,
-  }),
+  FornecedorCnds: z.union([
+    z.boolean(),
+    z.object({
+      where: whereFornecedorCnds,
+      orderBy: orderByFornecedorCnds,
+    }),
+  ]),
 });
 
-const queryCndType = z.object({
-  where: whereCndType.optional(),
-  orderBy: orderByCndType.optional(),
-  include: includeCnd.optional(),
-  limit: z.number().optional(),
-  page: z.number().optional(),
-});
+const queryCndType = z
+  .object({
+    where: whereCndType.optional(),
+    orderBy: orderByCndType.optional(),
+    include: includeCnd.optional(),
+    limit: z.number().positive().max(50).optional(),
+    page: z.number().int().min(1).optional(),
+  })
+  .refine(
+    (data) => {
+      return !(data.limit && !data.page);
+    },
+    {
+      message: "page is required when limit is provided",
+      path: ["page"],
+    },
+  );
 
 const newCndType = z
   .object({

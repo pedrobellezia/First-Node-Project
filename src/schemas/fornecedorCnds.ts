@@ -19,23 +19,27 @@ const orderByFornecedorCnds = z.object({
 });
 
 const includeFornecedorCnds = z.object({
-  fornecedor: z.object({
-    where: whereFornecedor,
-    orderBy: orderByFornecedor,
-  }),
-  cndType: z.object({
-    where: whereCndType,
-    orderBy: orderByCndType,
-  }),
+  Fornecedor: z.boolean(),
+  CndType: z.boolean(),
 });
 
-const queryFornecedorCnds = z.object({
-  where: whereFornecedorCnds.optional(),
-  orderBy: orderByFornecedorCnds.optional(),
-  include: includeFornecedorCnds.optional(),
-  limit: z.number().optional(),
-  page: z.number().optional(),
-});
+const queryFornecedorCnds = z
+  .object({
+    where: whereFornecedorCnds.optional(),
+    orderBy: orderByFornecedorCnds.optional(),
+    include: includeFornecedorCnds.optional(),
+    limit: z.number().positive().max(50).optional(),
+    page: z.number().int().min(1).optional(),
+  })
+  .refine(
+    (data) => {
+      return !(data.limit && !data.page);
+    },
+    {
+      message: "page is required when limit is provided",
+      path: ["page"],
+    },
+  );
 
 const newFornecedorCnds = z
   .object({

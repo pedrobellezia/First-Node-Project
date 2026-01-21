@@ -3,10 +3,9 @@ import fs from "fs";
 import path from "path";
 import api from "./axios.js";
 
-type CndTipo = "municipal" | "estadual" | "fgts" | "trabalhista";
 
 interface CndFilter {
-  tipo: CndTipo;
+  tipo: string;
   uf?: string;
   municipio?: string | null;
 }
@@ -28,7 +27,7 @@ interface ApiResponse {
 
 async function getCndfromApi(
   cnpj: string,
-  tipo: CndTipo,
+  tipo: string,
   uf?: string,
   municipio?: string
 ): Promise<ApiResponse> {

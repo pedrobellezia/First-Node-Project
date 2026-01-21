@@ -9,9 +9,17 @@ app.use(express.json());
 app.use(cors());
 app.set("query parser", "extended");
 
-// Servir arquivos estáticos (PDFs) da pasta public
-app.use("/public", express.static("public"));
+app.use((req, res, next) => {
+  console.log({
+    method: req.method,
+    url: req.originalUrl,
+    query: req.query,
+    body: req.body,
+  });
+  next();
+});
 
+app.use("/public", express.static("public"));
 app.use("/fornecedor", fornecedorRoute);
 app.use("/cndtype", cndtypeRoute);
 app.use("/cnd", cndRoute);

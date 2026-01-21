@@ -5,9 +5,13 @@ import CndTypeManager from "./cndtype.js";
 import Utils from "../lib/utils.js";
 import z from "zod";
 import { queryFornecedorCnds } from "../schemas/fornecedorCnds.js";
+import { FornecedorCnd } from "@prisma/client";
 
 class FornecedorCndsManager {
-  static async newCnd(fornecedorid: string, cndtypeid: string) {
+  static async newCnd(
+    fornecedorid: string,
+    cndtypeid: string,
+  ): Promise<FornecedorCnd | string> {
     const fornecedor = await FornecedorManager.getFornecedor({
       where: { id: fornecedorid },
     });
@@ -16,14 +20,14 @@ class FornecedorCndsManager {
     });
 
     if (!fornecedor.length || !cndtype.length) {
-      return;
+      return "Fornecedor ou tipo de CND não encontrado";
     }
 
     const response = await getCndfromApi(
       fornecedor[0].cnpj,
       cndtype[0].tipo,
-      cndtype[0].uf,
-      cndtype[0].municipio
+      cndtype[0].uf ?? undefined,
+      cndtype[0].municipio ?? undefined,
     );
 
     if (response.status_code !== 200) {
@@ -48,7 +52,13 @@ class FornecedorCndsManager {
   }
 
   static async getCnd(prop: z.infer<typeof queryFornecedorCnds>) {
-    return await prisma.fornecedorCnd.findMany({});
+    return await prisma.fornecedorCnd.findMany({
+      ...(prop.where && { where: prop.where }),
+      ...(prop.orderBy && { orderBy: prop.orderBy }),
+      ...(prop.include && { include: prop.include }),
+      ...(prop.limit && { take: prop.limit }),
+      ...(prop.page && { skip: (prop.page - 1) * prop.limit! }),
+    });
   }
 }
 

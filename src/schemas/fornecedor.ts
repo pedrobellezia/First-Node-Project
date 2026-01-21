@@ -4,6 +4,9 @@ import {
   whereFornecedorCnds,
 } from "./fornecedorCnds.js";
 
+function check_limit(data: any) {
+  return;
+}
 const whereFornecedor = z
   .object({
     ativo: z
@@ -28,19 +31,32 @@ const orderByFornecedor = z.object({
 });
 
 const includeFornecedor = z.object({
-  FornecedorCnds: z.object({
-    where: whereFornecedorCnds,
-    orderBy: orderByFornecedorCnds,
-  }),
+  FornecedorCnds: z.union([
+    z.boolean(),
+    z.object({
+      where: whereFornecedorCnds,
+      orderBy: orderByFornecedorCnds,
+    }),
+  ]),
 });
 
-const queryFornecedor = z.object({
-  where: whereFornecedor.optional(),
-  orderBy: orderByFornecedor.optional(),
-  include: includeFornecedor.optional(),
-  limit: z.number().optional(),
-  page: z.number().optional(),
-});
+const queryFornecedor = z
+  .object({
+    where: whereFornecedor.optional(),
+    orderBy: orderByFornecedor.optional(),
+    include: includeFornecedor.optional(),
+    limit: z.number().positive().max(50).optional(),
+    page: z.number().int().min(1).optional(),
+  })
+  .refine(
+    (data) => {
+      return !(data.limit && !data.page);
+    },
+    {
+      message: "page is required when limit is provided",
+      path: ["page"],
+    },
+  );
 
 const newFornecedor = z
   .object({

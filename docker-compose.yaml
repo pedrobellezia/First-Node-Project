@@ -1,11 +1,29 @@
 services:
+  db:
+    container_name: cnd-postgres
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: cnd_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
   api:
     container_name: cnd-api
     build: .
     ports:
       - "3000:3000"
     environment:
-      DATABASE_URL: ${DATABASE_URL}
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/cnd_db
       CND_API_URL: ${CND_API_URL}
       CAPTCHA_API_KEY: ${CAPTCHA_API_KEY}
+    depends_on:
+      - db
     restart: unless-stopped
+
+volumes:
+  postgres_data:
