@@ -30,6 +30,7 @@ class FornecedorManager {
       ...(prop.include && { include: prop.include }),
       ...(prop.limit && { take: prop.limit }),
       ...(prop.page && { skip: (prop.page - 1) * prop.limit! }),
+      ...(prop.select && { select: prop.select }),
     });
     return fornecedor;
   }

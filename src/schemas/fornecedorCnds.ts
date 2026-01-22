@@ -1,6 +1,6 @@
 import * as z from "zod";
-import { orderByCndType, whereCndType } from "./cndtype.js";
-import { orderByFornecedor, whereFornecedor } from "./fornecedor.js";
+import { selectCndType } from "./cndtype.js";
+import { selectFornecedor } from "./fornecedor.js";
 
 const whereFornecedorCnds = z
   .object({
@@ -23,6 +23,28 @@ const includeFornecedorCnds = z.object({
   CndType: z.boolean(),
 });
 
+const anti_circular_import = {
+  id: z.boolean().optional(),
+  fornecedorid: z.boolean().optional(),
+  cndtypeid: z.boolean().optional(),
+  file_name: z.boolean().optional(),
+  validade: z.boolean().optional(),
+  ativo: z.boolean().optional(),
+  createdAt: z.boolean().optional(),
+};
+
+const selectFornecedorCnds = z.object({
+  ...anti_circular_import,
+  Fornecedor: z
+    .boolean()
+    .or(z.lazy(() => z.object({ select: z.lazy(() => selectFornecedor) })))
+    .optional(),
+  CndType: z
+    .boolean()
+    .or(z.lazy(() => z.object({ select: z.lazy(() => selectCndType) })))
+    .optional(),
+});
+
 const queryFornecedorCnds = z
   .object({
     where: whereFornecedorCnds.optional(),
@@ -30,6 +52,7 @@ const queryFornecedorCnds = z
     include: includeFornecedorCnds.optional(),
     limit: z.number().positive().max(50).optional(),
     page: z.number().int().min(1).optional(),
+    select: selectFornecedorCnds.optional(),
   })
   .refine(
     (data) => {
@@ -53,4 +76,6 @@ export {
   queryFornecedorCnds,
   orderByFornecedorCnds,
   whereFornecedorCnds,
+  anti_circular_import,
+  selectFornecedorCnds,
 };

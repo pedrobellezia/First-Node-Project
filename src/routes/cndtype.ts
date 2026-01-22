@@ -31,7 +31,7 @@ cndtypeRoute.post("", async (req, res) => {
 
 // complex query
 cndtypeRoute.post("/search", async (req, res) => {
-  let data = await queryCndType.safeParseAsync(req.query);
+  let data = await queryCndType.safeParseAsync(req.body);
 
   if (!data.success) {
     res.json({

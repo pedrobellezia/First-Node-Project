@@ -28,7 +28,7 @@ fornecedorRoute.post("", async (req, res) => {
 
 // complex query
 fornecedorRoute.post("/search", async (req, res) => {
-  let data = await queryFornecedor.safeParseAsync(req.query);
+  let data = await queryFornecedor.safeParseAsync(req.body);
 
   if (!data.success) {
     res.json({
@@ -61,6 +61,7 @@ fornecedorRoute.get("", async (req, res) => {
     where.cnpj = cnpj;
   }
   if (name && typeof name === "string") {
+
     where.name = name;
   }
   if (uf && typeof uf === "string") {

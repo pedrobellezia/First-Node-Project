@@ -1,8 +1,10 @@
 import * as z from "zod";
 import {
+  anti_circular_import,
   orderByFornecedorCnds,
   whereFornecedorCnds,
 } from "./fornecedorCnds.js";
+import { aci_fornecedor } from "./fornecedor.js";
 
 const whereCndType = z
   .object({
@@ -25,23 +27,53 @@ const orderByCndType = z.object({
   createdAt: z.enum(["asc", "desc"]).optional(),
 });
 
-const includeCnd = z.object({
+const includeCndType = z.object({
   FornecedorCnds: z.union([
     z.boolean(),
     z.object({
-      where: whereFornecedorCnds,
-      orderBy: orderByFornecedorCnds,
+      where: z.lazy(() => whereFornecedorCnds).optional(),
+      orderBy: z.lazy(() => orderByFornecedorCnds).optional(),
     }),
   ]),
+});
+
+const aci_cndType = {
+  id: z.boolean().optional(),
+  uf: z.boolean().optional(),
+  municipio: z.boolean().optional(),
+  tipo: z.boolean().optional(),
+  instructions: z.boolean().optional(),
+  ativo: z.boolean().optional(),
+  createdAt: z.boolean().optional(),
+};
+const selectCndType = z.object({
+  ...aci_cndType,
+  FornecedorCnds: z
+    .boolean()
+    .or(
+      z.lazy(() =>
+        z.object({
+          select: z.object({
+            ...anti_circular_import,
+            Fornecedor: z
+              .boolean()
+              .or(z.lazy(() => z.object({ select: z.object({ ...aci_fornecedor }) })))
+              .optional(),
+          }),
+        }),
+      ),
+    )
+    .optional(),
 });
 
 const queryCndType = z
   .object({
     where: whereCndType.optional(),
     orderBy: orderByCndType.optional(),
-    include: includeCnd.optional(),
+    include: includeCndType.optional(),
     limit: z.number().positive().max(50).optional(),
     page: z.number().int().min(1).optional(),
+    select: selectCndType.optional(),
   })
   .refine(
     (data) => {
@@ -62,4 +94,10 @@ const newCndType = z
   })
   .strict();
 
-export { queryCndType, whereCndType, orderByCndType, newCndType };
+export {
+  queryCndType,
+  whereCndType,
+  orderByCndType,
+  newCndType,
+  selectCndType,
+};

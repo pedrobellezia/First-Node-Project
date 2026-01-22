@@ -52,13 +52,17 @@ class FornecedorCndsManager {
   }
 
   static async getCnd(prop: z.infer<typeof queryFornecedorCnds>) {
-    return await prisma.fornecedorCnd.findMany({
+    console.log(prop);
+    const filter = {
       ...(prop.where && { where: prop.where }),
       ...(prop.orderBy && { orderBy: prop.orderBy }),
       ...(prop.include && { include: prop.include }),
       ...(prop.limit && { take: prop.limit }),
       ...(prop.page && { skip: (prop.page - 1) * prop.limit! }),
-    });
+      ...(prop.select && { select: prop.select }),
+    };
+    console.log(filter);
+    return await prisma.fornecedorCnd.findMany(filter);
   }
 }
 

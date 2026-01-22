@@ -30,9 +30,9 @@ fornecedorCndsRoute.post("", async (req, res) => {
   });
 });
 
-// complex query
+// complex query  
 fornecedorCndsRoute.post("/search", async (req, res) => {
-  let data = await queryFornecedorCnds.safeParseAsync(req.query);
+  let data = await queryFornecedorCnds.safeParseAsync(req.body);
 
   if (!data.success) {
     res.json({
