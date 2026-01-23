@@ -1,3 +1,4 @@
+import { prisma } from "./lib/prisma.js";
 import app from "./server.js";
 
 const PORT = 3000;
@@ -10,6 +11,15 @@ if (!process.env.DATABASE_URL) {
   throw new Error("CND_API_URL is not defined");
 }
 
-app.listen(PORT, '0.0.0.0',() => {
-  console.log(`Server is running on http://localhost:${PORT}`);
-});
+try {
+  await prisma.$connect();
+  console.log("Database connected");
+
+  app.listen(PORT, "0.0.0.0", () => {
+    console.log(`Server is running on http://localhost:${PORT}`);
+  });
+} catch (err) {
+  console.error("Database connection failed");
+  console.error(err);
+  process.exit(1);
+}
