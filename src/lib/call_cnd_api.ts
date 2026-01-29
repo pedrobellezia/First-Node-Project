@@ -51,7 +51,7 @@ async function getCndfromApi(
 
   const { data, status } = await api.post("/execute_scrap", instructions);
 
-  const fileResponse = await api.get(`/cnd/${data.files_saved[0].path}`, {
+  const fileResponse = await api.get(`/pdf/${data.files_saved[0].path}`, {
     responseType: "arraybuffer",
   });
 

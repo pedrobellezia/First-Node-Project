@@ -27,3 +27,7 @@ prisma/generated/
 
 # Public
 /public/*
+
+# Seed
+seed-data.json
+
