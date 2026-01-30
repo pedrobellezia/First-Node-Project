@@ -6,15 +6,10 @@ import {
 } from "./fornecedorCnds.js";
 import { selectCndType } from "./cndtype.js";
 
-function check_limit(data: any) {
-  return;
-}
+
 const whereFornecedor = z
   .object({
-    ativo: z
-      .any()
-      .transform(() => true)
-      .optional(),
+    ativo: z.boolean().default(true).optional(),
     cnpj: z.string().optional(),
     name: z.string().optional(),
     uf: z.string().optional(),

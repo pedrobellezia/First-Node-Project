@@ -8,10 +8,7 @@ const whereFornecedorCnds = z
     fornecedorid: z.string().optional(),
     cndtypeid: z.string().optional(),
     vencido: z.boolean().optional(),
-    ativo: z
-      .any()
-      .transform(() => true)
-      .optional(),
+    ativo: z.boolean().default(true).optional(),
   })
   .strict();
 

@@ -8,10 +8,7 @@ import { aci_fornecedor } from "./fornecedor.js";
 
 const whereCndType = z
   .object({
-    ativo: z
-      .any()
-      .transform(() => true)
-      .optional(),
+    ativo: z.boolean().default(true).optional(),
     tipo: z.string().optional(),
     uf: z.string().optional(),
     municipio: z.string().optional(),
