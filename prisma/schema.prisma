@@ -34,9 +34,9 @@ model FornecedorCnd {
   cndtypeid    String
   file_name    String
   validade     DateTime @db.Date
+  vencido      Boolean  @default(false)
   ativo        Boolean  @default(true)
   createdAt    DateTime @default(now()) @db.Timestamp(6)
-
   Fornecedor Fornecedor @relation(fields: [fornecedorid], references: [id])
   CndType    CndType    @relation(fields: [cndtypeid], references: [id])
 }
