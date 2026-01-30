@@ -2,7 +2,7 @@ import { PDFParse } from "pdf-parse";
 
 class Utils {
   static async get_validade(filename: string) {
-    const url = `${process.env.CND_API_URL!}/cnd/${filename}`;
+    const url = `${process.env.CND_API_URL!}/pdf/${filename}`;
     const parser = new PDFParse({ url: url });
     const text = (await parser.getText()).text;
 

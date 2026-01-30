@@ -12,4 +12,5 @@ RUN npm ci --omit=dev
 COPY --from=builder /app/dist ./dist 
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma 
 COPY --from=builder /app/prisma ./prisma 
+RUN mkdir /app/public
 CMD ["npx", "pm2-runtime", "dist/index.js"]
