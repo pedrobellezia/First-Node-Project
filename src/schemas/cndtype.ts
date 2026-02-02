@@ -87,7 +87,7 @@ const newCndType = z
     uf: z.string().optional(),
     municipio: z.string().optional(),
     tipo: z.string(),
-    instructions: z.object(),
+    instructions: z.record(z.string(), z.any()).optional(),
   })
   .strict();
 
