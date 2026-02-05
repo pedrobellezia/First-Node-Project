@@ -62,12 +62,16 @@ class FornecedorCndsManager {
     }
 
     console.log('[FornecedorCndsManager.newCnd] Validações passaram. Validade:', result.validade);
+    
+    const [dia, mes, ano] = result.validade.split('/');
+    const validadeDate = new Date(`${ano}-${mes}-${dia}`);
+    
     const createdCnd = await prisma.fornecedorCnd.create({
       data: {
         fornecedorid,
         cndtypeid,
         file_name,
-        validade: result.validade,
+        validade: validadeDate, 
       },
     });
 
