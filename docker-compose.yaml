@@ -26,6 +26,7 @@ services:
       DATABASE_URL: postgresql://postgres:postgres@db:5432/cnd_db
       CND_API_URL: ${CND_API_URL}
       CAPTCHA_API_KEY: ${CAPTCHA_API_KEY}
+      N8N_WEBHOOK_URL: ${N8N_WEBHOOK_URL}
     depends_on:
       db:
         condition: service_healthy

@@ -15,6 +15,7 @@ class FornecedorCndsManager {
     const fornecedor = await FornecedorManager.getFornecedor({
       where: { id: fornecedorid },
     });
+
     const cndtype = await CndTypeManager.getCndType({
       where: { id: cndtypeid },
     });
@@ -31,24 +32,42 @@ class FornecedorCndsManager {
     );
 
     if (response.status_code !== 200) {
-      return "deu errado na chamada da api";
+      return "Erro na chamada da API de CND";
     }
 
     const file_name = response.details.files_saved[0].path;
 
-    const validade = await Utils.get_validade(file_name);
-    if (!validade) {
-      return "nao deu pra achar a validade desse cnd";
+    const result = await Utils.get_validade(
+      file_name,
+      cndtype[0].tipo as "fgts" | "trabalhista" | "municipal" | "estadual",
+    );
+
+    if (result.certidao === null) {
+      return result.detail ?? "Não foi possível interpretar a certidão";
     }
 
-    return await prisma.fornecedorCnd.create({
+    if (result.certidao === false) {
+      return "Certidão positiva com débitos";
+    }
+
+    if (!result.validade) {
+      return "Certidão válida, porém não foi possível identificar a validade";
+    }
+
+    const createdCnd = await prisma.fornecedorCnd.create({
       data: {
-        fornecedorid: fornecedorid,
-        cndtypeid: cndtypeid,
-        file_name: file_name,
-        validade: validade,
+        fornecedorid,
+        cndtypeid,
+        file_name,
+        validade: result.validade,
       },
     });
+
+    console.log(
+      `CND criada com sucesso | Fornecedor: ${fornecedor[0].cnpj} | Tipo: ${cndtype[0].tipo} | Validade: ${createdCnd.validade}`,
+    );
+
+    return createdCnd;
   }
 
   static async getCnd(prop: z.infer<typeof queryFornecedorCnds>) {

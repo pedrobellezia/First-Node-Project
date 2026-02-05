@@ -3,7 +3,6 @@ import fs from "fs";
 import path from "path";
 import api from "./axios.js";
 
-
 interface CndFilter {
   tipo: string;
   uf?: string;
@@ -29,43 +28,59 @@ async function getCndfromApi(
   cnpj: string,
   tipo: string,
   uf?: string,
-  municipio?: string
-): Promise<ApiResponse> {
-  const filter: CndFilter = {
-    tipo,
-    ...(tipo === "municipal" && { uf, municipio }),
-    ...(tipo === "estadual" && { uf, municipio: null }),
-  };
+  municipio?: string,
+) {
+  try {
+    const filter: CndFilter = {
+      tipo,
+      ...(tipo === "municipal" && { uf, municipio }),
+      ...(tipo === "estadual" && { uf, municipio: null }),
+    };
 
-  const cndtype = await prisma.cndType.findFirst({
-    where: filter,
-  });
+    const cndtype = await prisma.cndType.findFirst({ where: filter });
 
-  if (!cndtype) {
-    throw new Error("cndtype not found");
+    if (!cndtype) {
+      throw new Error("cndtype not found");
+    }
+
+    const instructions = JSON.stringify(cndtype.instructions)
+      .replace("%CNPJ%", cnpj)
+      .replace("%API_KEY%", process.env.CAPTCHA_API_KEY!);
+
+    const response = await api.post("/execute_scrap", instructions);
+
+    const { files_saved } = response.data;
+
+    if (!files_saved?.length) {
+      throw new Error("No files returned by API");
+    }
+
+    const pdfPath = files_saved[0].path;
+
+    const fileResponse = await api.get(`/pdf/${pdfPath}`, {
+      responseType: "arraybuffer",
+    });
+
+    const fileName = path.basename(pdfPath);
+    const outputPath = path.resolve("public", fileName);
+
+    fs.writeFileSync(outputPath, Buffer.from(fileResponse.data));
+
+    return {
+      status_code: response.status,
+      message: "Success",
+      details: response.data,
+    };
+  } catch (error: any) {
+    if (error.response) {
+      return {
+        status_code: error.response.status,
+        message: error.response.data?.detail?.message ?? "API Error",
+        details: error.response.data?.detail?.details ?? {},
+      };
+    }
+    throw error;
   }
-
-  const instructions = JSON.stringify(cndtype.instructions)
-    .replace("%CNPJ%", cnpj)
-    .replace("%API_KEY%", process.env.CAPTCHA_API_KEY!);
-
-  const { data, status } = await api.post("/execute_scrap", instructions);
-
-  const fileResponse = await api.get(`/pdf/${data.files_saved[0].path}`, {
-    responseType: "arraybuffer",
-  });
-
-  const pdfBuffer = Buffer.from(fileResponse.data);
-  const fileName = path.basename(data.files_saved[0].path);
-  const outputPath = path.resolve("public", fileName);
-
-  fs.writeFileSync(outputPath, pdfBuffer);
-
-  return {
-    status_code: status,
-    message: "Success",
-    details: data,
-  };
 }
 
 export default getCndfromApi;
