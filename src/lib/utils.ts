@@ -115,7 +115,7 @@ class Utils {
       let response;
       try {
         response = await axios.post(
-          `${process.env.N8N_WEBHOOK_URL}/extract_date`,
+          `${process.env.N8N_WEBHOOK_URL}/extract_info`,
           { text: sanitized },
           { timeout: 30_000 },
         );
