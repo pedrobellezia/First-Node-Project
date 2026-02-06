@@ -9,7 +9,7 @@ type CertidaoResult = {
 
 class Utils {
   static sanitize_text(text: String) {
-    const sanitized = text
+    return text
       .normalize("NFD")
       .replace(/[\u0300-\u036f]/g, "")
       .replace(/[^\w\s]/g, " ")
@@ -23,9 +23,6 @@ class Utils {
       )
       .replace(/\s+/g, " ")
       .trim();
-    const cutof = sanitized.indexOf("validade");
-    if (cutof === -1) return "";
-    return sanitized.slice(cutof).trim();
   }
 
   static async get_validade(
