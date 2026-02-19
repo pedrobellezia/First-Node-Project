@@ -29,6 +29,14 @@ class Utils {
     filename: string,
     cndtype: "fgts" | "trabalhista" | "municipal" | "estadual",
   ): Promise<CertidaoResult> {
+    if (!["fgts", "trabalhista", "municipal", "estadual"].includes(cndtype)) {
+      return {
+        certidao: null,
+        validade: null,
+        detail: "Tipo de certidão não suportado",
+      };
+    }
+
     const url = `${process.env.CND_API_URL!}/pdf/${filename}`;
 
     let text: string;
@@ -54,101 +62,58 @@ class Utils {
       };
     }
 
-    const validade =
-      text.match(/Validade\s*:?[\s\n]*(\d{2}\/\d{2}\/\d{4})/i)?.[1] ?? null;
+    let sanitized: string;
 
-    if (cndtype === "fgts") {
-      if (/\bsitua[cç][aã]o\s+regular\b/i.test(text)) {
-        return { certidao: true, validade };
-      }
-
-      if (/\bsitua[cç][aã]o\s+irregular\b/i.test(text)) {
-        return { certidao: false, validade };
-      }
-
+    try {
+      sanitized = this.sanitize_text(text);
+    } catch {
       return {
         certidao: null,
-        validade,
-        detail: "Não foi possível determinar a situação do FGTS",
+        validade: null,
+        detail: "Erro ao sanitizar o texto da certidão",
       };
     }
 
-    if (cndtype === "trabalhista") {
-      if (/\b(nada\s+)?n[aã]o\s+consta\b/i.test(text)) {
-        return { certidao: true, validade };
-      }
-
-      if (/\bconsta\b|\bd[eé]bitos?\b|\bpend[eê]ncia\b/i.test(text)) {
-        return { certidao: false, validade };
-      }
-
+    if (!sanitized || sanitized.length < 20) {
       return {
         certidao: null,
-        validade,
-        detail:
-          "Não foi possível determinar a situação da certidão trabalhista",
+        validade: null,
+        detail: "Texto insuficiente para análise da certidão",
       };
     }
 
-    if (cndtype === "municipal" || cndtype === "estadual") {
-      let sanitized: string;
-
-      try {
-        sanitized = this.sanitize_text(text);
-      } catch {
-        return {
-          certidao: null,
-          validade: null,
-          detail: "Erro ao sanitizar o texto da certidão",
-        };
-      }
-
-      if (!sanitized || sanitized.length < 20) {
-        return {
-          certidao: null,
-          validade: null,
-          detail: "Texto insuficiente para análise da certidão",
-        };
-      }
-
-      let response;
-      try {
-        response = await axios.post(
-          `${process.env.N8N_WEBHOOK_URL}/extract_info`,
-          { text: sanitized },
-          { timeout: 30_000 },
-        );
-      } catch (error) {
-        console.error("Erro ao chamar o serviço de análise (n8n):", error);
-        return {
-          certidao: null,
-          validade: null,
-          detail: "Erro ao chamar o serviço de análise (n8n)",
-        };
-      }
-
-      const data = response.data;
-
-      if (!data || data.success === false) {
-        return {
-          certidao: null,
-          validade: null,
-          detail: data?.detail ?? "Falha no workflow de análise",
-        };
-      }
-
+    let response;
+    try {
+      response = await axios.post(
+        `${process.env.N8N_WEBHOOK_URL}/extract_info`,
+        { text: sanitized },
+        { timeout: 30_000 },
+      );
+    } catch (error) {
+      console.error("Erro ao chamar o serviço de análise (n8n):", error);
       return {
-        certidao: typeof data.certidao === "boolean" ? data.certidao : null,
-        validade: typeof data.validade === "string" ? data.validade : null,
-        ...(data.certidao === null && {
-          detail: "Não foi possível determinar a situação da certidão",
-        }),
+        certidao: null,
+        validade: null,
+        detail: "Erro ao chamar o serviço de análise (n8n)",
       };
     }
+
+    const data = response.data;
+
+    if (!data || data.success === false) {
+      return {
+        certidao: null,
+        validade: null,
+        detail: data?.detail ?? "Falha no workflow de análise",
+      };
+    }
+
     return {
-      certidao: null,
-      validade: null,
-      detail: "Tipo de certidão não suportado",
+      certidao: typeof data.certidao === "boolean" ? data.certidao : null,
+      validade: typeof data.validade === "string" ? data.validade : null,
+      ...(data.certidao === null && {
+        detail: "Não foi possível determinar a situação da certidão",
+      }),
     };
   }
 }
