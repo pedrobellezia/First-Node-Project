@@ -1,60 +1,59 @@
 import * as z from "zod";
-import {
-  anti_circular_import,
-  orderByFornecedorCnds,
-  whereFornecedorCnds,
-} from "./fornecedorCnds.js";
-import { aci_fornecedor } from "./fornecedor.js";
+import { whereCndCategory, orderByCndCategory } from "./cndCategory.js";
+import { selectFornecedorCategory } from "./fornecedorCategory.js";
 
 const whereCndType = z
   .object({
     ativo: z.boolean().default(true).optional(),
     tipo: z.string().optional(),
-    uf: z.string().optional(),
-    municipio: z.string().optional(),
     id: z.string().optional(),
   })
   .strict();
 
 const orderByCndType = z.object({
   tipo: z.enum(["asc", "desc"]).optional(),
-  uf: z.enum(["asc", "desc"]).optional(),
-  municipio: z.enum(["asc", "desc"]).optional(),
   id: z.enum(["asc", "desc"]).optional(),
   createdAt: z.enum(["asc", "desc"]).optional(),
 });
 
 const includeCndType = z.object({
-  FornecedorCnds: z.union([
+  categories: z.union([
     z.boolean(),
     z.object({
-      where: z.lazy(() => whereFornecedorCnds).optional(),
-      orderBy: z.lazy(() => orderByFornecedorCnds).optional(),
+      where: z.lazy(() => whereCndCategory).optional(),
+      orderBy: z.lazy(() => orderByCndCategory).optional(),
+      include: z.object({
+        fornecedores: z.boolean().optional(),
+      }).optional(),
     }),
   ]),
 });
 
-const aci_cndType = {
+const selectCndTypeFields = {
   id: z.boolean().optional(),
-  uf: z.boolean().optional(),
-  municipio: z.boolean().optional(),
   tipo: z.boolean().optional(),
-  instructions: z.boolean().optional(),
   ativo: z.boolean().optional(),
   createdAt: z.boolean().optional(),
 };
-const selectCndType = z.object({
-  ...aci_cndType,
-  FornecedorCnds: z
+
+const selectCndType: z.ZodType<any> = z.object({
+  ...selectCndTypeFields,
+  categories: z
     .boolean()
     .or(
       z.lazy(() =>
         z.object({
           select: z.object({
-            ...anti_circular_import,
-            Fornecedor: z
+            id: z.boolean().optional(),
+            uf: z.boolean().optional(),
+            municipio: z.boolean().optional(),
+            cndTypeId: z.boolean().optional(),
+            instructions: z.boolean().optional(),
+            ativo: z.boolean().optional(),
+            createdAt: z.boolean().optional(),
+            fornecedores: z
               .boolean()
-              .or(z.lazy(() => z.object({ select: z.object({ ...aci_fornecedor }) })))
+              .or(z.lazy(() => z.object({ select: selectFornecedorCategory })))
               .optional(),
           }),
         }),
@@ -73,28 +72,25 @@ const queryCndType = z
     select: selectCndType.optional(),
   })
   .refine(
-    (data) => {
-      return !(data.limit && !data.page);
-    },
-    {
-      message: "page is required when limit is provided",
-      path: ["page"],
-    },
+    (data) => !(data.limit && !data.page),
+    { message: "page is required when limit is provided", path: ["page"] }
   );
 
 const newCndType = z
   .object({
-    uf: z.string().optional(),
-    municipio: z.string().optional(),
     tipo: z.string(),
-    instructions: z.record(z.string(), z.any()).optional(),
+    diasRestantes: z.number().int().positive(),
   })
   .strict();
+
+const updateCndType = newCndType.partial();
 
 export {
   queryCndType,
   whereCndType,
   orderByCndType,
   newCndType,
+  updateCndType,
   selectCndType,
+  selectCndTypeFields,
 };

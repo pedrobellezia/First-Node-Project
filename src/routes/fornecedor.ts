@@ -4,110 +4,126 @@ import { newFornecedor, queryFornecedor } from "../schemas/fornecedor.js";
 
 const fornecedorRoute = Router();
 
-// new
-fornecedorRoute.post("", async (req, res) => {
-  let data = await newFornecedor.safeParseAsync(req.body);
-  if (!data.success) {
-    res.json({
-      success: false,
-      data: data.error.issues,
+// POST / - Criar novo fornecedor
+fornecedorRoute.post("/", async (req, res) => {
+  try {
+    const data = await newFornecedor.safeParseAsync(req.body);
+    
+    if (!data.success) {
+      res.status(400).json({
+        success: false,
+        error: "Dados inválidos",
+        details: data.error.issues
+      });
+      return;
+    }
+
+    const fornecedor = await FornecedorManager.newFornecedor(
+      data.data.cnpj,
+      data.data.name,
+      data.data.uf,
+      data.data.municipio
+    );
+    
+    res.status(201).json({
+      success: true,
+      data: fornecedor
     });
-    return;
+  } catch (error) {
+    console.error("[POST /fornecedor] Erro ao criar fornecedor:", error);
+    res.status(500).json({
+      success: false,
+      error: "Erro interno do servidor"
+    });
   }
-  const fornecedor = await FornecedorManager.newFornecedor(
-    data.data.cnpj,
-    data.data.name,
-    data.data.uf,
-    data.data.municipio,
-  );
-  res.json({
-    success: true,
-    data: fornecedor,
-  });
 });
 
-// complex query
+// POST /search - Busca avançada
 fornecedorRoute.post("/search", async (req, res) => {
-  let data = await queryFornecedor.safeParseAsync(req.body);
+  try {
+    const data = await queryFornecedor.safeParseAsync(req.body);
 
-  if (!data.success) {
+    if (!data.success) {
+      res.status(400).json({
+        success: false,
+        error: "Filtros inválidos",
+        details: data.error.issues
+      });
+      return;
+    }
+
+    const fornecedores = await FornecedorManager.getFornecedores(data.data);
+
     res.json({
-      success: false,
-      data: data.error.issues,
+      success: true,
+      data: fornecedores,
+      count: fornecedores.length
     });
-    return;
-  }
-
-  const fornecedores = await FornecedorManager.getFornecedor(data.data);
-
-  if (fornecedores.length === 0) {
-    res.json({
+  } catch (error) {
+    console.error("[POST /fornecedor/search] Erro na busca:", error);
+    res.status(500).json({
       success: false,
-      data: "Fornecedor not found",
+      error: "Erro interno do servidor"
     });
-    return;
   }
-
-  res.json({ success: true, data: fornecedores });
 });
 
-// many with filter
-fornecedorRoute.get("", async (req, res) => {
-  const { cnpj, name, uf, municipio } = req.query;
+// GET / - Listar com filtros
+fornecedorRoute.get("/", async (req, res) => {
+  try {
+    const { cnpj, name, uf, municipio, ativo } = req.query;
+    const where: any = {};
 
-  const where: any = { ativo: true };
+    if (ativo !== undefined) where.ativo = ativo === 'true';
+    if (cnpj && typeof cnpj === "string") where.cnpj = cnpj;
+    if (name && typeof name === "string") where.name = name;
+    if (uf && typeof uf === "string") where.uf = uf;
+    if (municipio && typeof municipio === "string") where.municipio = municipio;
 
-  if (cnpj && typeof cnpj === "string") {
-    where.cnpj = cnpj;
-  }
-  if (name && typeof name === "string") {
+    const fornecedores = await FornecedorManager.getFornecedores({ where });
 
-    where.name = name;
-  }
-  if (uf && typeof uf === "string") {
-    where.uf = uf;
-  }
-  if (municipio && typeof municipio === "string") {
-    where.municipio = municipio;
-  }
-
-  const fornecedores = await FornecedorManager.getFornecedor({ where });
-
-  if (fornecedores.length === 0) {
     res.json({
-      success: false,
-      data: "Fornecedor not found",
+      success: true,
+      data: fornecedores,
+      count: fornecedores.length
     });
-    return;
+  } catch (error) {
+    console.error("[GET /fornecedor] Erro ao listar:", error);
+    res.status(500).json({
+      success: false,
+      error: "Erro interno do servidor"
+    });
   }
-
-  res.json({ success: true, data: fornecedores });
 });
 
-// only one
+// GET /:id - Buscar por ID
 fornecedorRoute.get("/:id", async (req, res) => {
-  const id = req.params.id;
+  try {
+    const { id } = req.params;
 
-  if (typeof id !== "string") {
-    res.json({
-      success: false,
-      data: "ID must be a string",
+    const fornecedores = await FornecedorManager.getFornecedores({
+      where: { id }
     });
-    return;
-  }
+    
+    if (fornecedores.length === 0) {
+      res.status(404).json({
+        success: false,
+        error: "Fornecedor não encontrado"
+      });
+      return;
+    }
 
-  const fornecedores = await FornecedorManager.getFornecedor({
-    where: { ativo: true, id: id },
-  });
-  if (fornecedores.length === 0) {
     res.json({
-      success: false,
-      data: "Fornecedor not found",
+      success: true,
+      data: fornecedores[0]
     });
-    return;
+  } catch (error) {
+    console.error("[GET /fornecedor/:id] Erro ao buscar:", error);
+    res.status(500).json({
+      success: false,
+      error: "Erro interno do servidor"
+    });
   }
-
-  res.json({ success: true, data: fornecedores[0] });
 });
 
 export default fornecedorRoute;

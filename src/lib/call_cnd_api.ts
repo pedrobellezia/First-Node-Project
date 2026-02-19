@@ -18,68 +18,71 @@ interface ApiDetails {
   files_saved: SavedFile[];
 }
 
-interface ApiResponse {
-  status_code: number;
-  message: string;
-  details: ApiDetails;
+async function downloadPdf(pdfPath: string): Promise<string> {
+  const response = await api.get(`/pdf/${pdfPath}`, {
+    responseType: "arraybuffer",
+  });
+
+  const buffer = Buffer.from(response.data);
+  const fileName = path.basename(pdfPath);
+  const outputPath = path.resolve("public", fileName);
+
+  fs.writeFileSync(outputPath, buffer);
+
+  console.log(`[PDF] Downloaded successfully: ${outputPath}`);
+
+  return outputPath;
 }
 
-async function getCndfromApi(
-  cnpj: string,
-  tipo: string,
-  uf?: string,
-  municipio?: string,
-) {
-  try {
-    const filter: CndFilter = {
-      tipo,
-      ...(tipo === "municipal" && { uf, municipio }),
-      ...(tipo === "estadual" && { uf, municipio: null }),
-    };
+async function getCndfromApi(cnpj: string, rawInstructions: string) {
+  const maxAttempts = 3;
 
-    const cndtype = await prisma.cndType.findFirst({ where: filter });
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      const instructions = JSON.stringify(rawInstructions)
+        .replace("%CNPJ%", cnpj)
+        .replace("%API_KEY%", process.env.CAPTCHA_API_KEY!);
 
-    if (!cndtype) {
-      throw new Error("cndtype not found");
-    }
+      const response = await api.post("/execute_scrap", instructions);
 
-    const instructions = JSON.stringify(cndtype.instructions)
-      .replace("%CNPJ%", cnpj)
-      .replace("%API_KEY%", process.env.CAPTCHA_API_KEY!);
+      const { files_saved } = response.data;
 
-    const response = await api.post("/execute_scrap", instructions);
+      if (!files_saved?.length) {
+        throw new Error("No files returned by API");
+      }
 
-    const { files_saved } = response.data;
+      const file_name = files_saved[0].path;
 
-    if (!files_saved?.length) {
-      throw new Error("No files returned by API");
-    }
+      const savedPath = await downloadPdf(file_name);
+      console.log(`[CND] PDF saved at: ${savedPath}`);
 
-    const pdfPath = files_saved[0].path;
-
-    const fileResponse = await api.get(`/pdf/${pdfPath}`, {
-      responseType: "arraybuffer",
-    });
-
-    const fileName = path.basename(pdfPath);
-    const outputPath = path.resolve("public", fileName);
-
-    fs.writeFileSync(outputPath, Buffer.from(fileResponse.data));
-
-    return {
-      status_code: response.status,
-      message: "Success",
-      details: response.data,
-    };
-  } catch (error: any) {
-    if (error.response) {
       return {
-        status_code: error.response.status,
-        message: error.response.data?.detail?.message ?? "API Error",
-        details: error.response.data?.detail?.details ?? {},
+        status_code: 200,
+        message: "Success",
+        details: {
+          files_saved: [{ path: file_name }],
+          ...response.data.details,
+        },
       };
+    } catch (error: any) {
+      console.warn(
+        `[CND] Attempt ${attempt}/${maxAttempts} failed.`,
+        error.response ? `Status: ${error.response.status}` : error.message,
+      );
+
+      if (attempt === maxAttempts) {
+        if (error.response) {
+          return {
+            status_code: error.response.status,
+            message: error.response.data?.detail?.message ?? "API Error",
+            details: error.response.data?.detail?.details ?? {},
+          };
+        }
+        throw error;
+      }
+
+      console.log(`[CND] Retrying...`);
     }
-    throw error;
   }
 }
 

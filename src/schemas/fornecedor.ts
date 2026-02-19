@@ -1,11 +1,10 @@
 import * as z from "zod";
+import { orderByCnd, whereCnd, selectCnd } from "./cnd.js";
+import { selectCndCategory } from "./cndCategory.js";
 import {
-  orderByFornecedorCnds,
-  anti_circular_import,
-  whereFornecedorCnds,
-} from "./fornecedorCnds.js";
-import { selectCndType } from "./cndtype.js";
-
+  whereFornecedorCategory,
+  orderByFornecedorCategory,
+} from "./fornecedorCategory.js";
 
 const whereFornecedor = z
   .object({
@@ -28,39 +27,52 @@ const orderByFornecedor = z.object({
 });
 
 const includeFornecedor = z.object({
-  FornecedorCnds: z.union([
+  categories: z.union([
     z.boolean(),
     z.object({
-      where: whereFornecedorCnds.optional(),
-      orderBy: orderByFornecedorCnds.optional(),
+      where: z.lazy(() => whereFornecedorCategory).optional(),
+      orderBy: z.lazy(() => orderByFornecedorCategory).optional(),
       include: z
         .object({
-          CndType: z.boolean().optional(),
+          cndCategory: z.boolean().optional(),
+          cnds: z.boolean().optional(),
         })
         .optional(),
     }),
   ]),
 });
 
-const aci_fornecedor = {
+const selectFornecedorFields = {
   id: z.boolean().optional(),
   cnpj: z.boolean().optional(),
   name: z.boolean().optional(),
   uf: z.boolean().optional(),
   municipio: z.boolean().optional(),
+  ativo: z.boolean().optional(),
   createdAt: z.boolean().optional(),
 };
 
-const selectFornecedor = z.object({
-  ...aci_fornecedor,
-  FornecedorCnds: z
+const selectFornecedor: z.ZodType<any> = z.object({
+  ...selectFornecedorFields,
+  categories: z
     .boolean()
     .or(
       z.lazy(() =>
         z.object({
           select: z.object({
-            ...anti_circular_import,
-            CndType: z.boolean().or(z.lazy(() => z.object({ select: z.lazy(() => selectCndType) }))).optional(),
+            id: z.boolean().optional(),
+            fornecedorId: z.boolean().optional(),
+            cndCategoryId: z.boolean().optional(),
+            ativo: z.boolean().optional(),
+            createdAt: z.boolean().optional(),
+            cndCategory: z
+              .boolean()
+              .or(z.lazy(() => z.object({ select: selectCndCategory })))
+              .optional(),
+            cnds: z
+              .boolean()
+              .or(z.lazy(() => z.object({ select: selectCnd })))
+              .optional(),
           }),
         }),
       ),
@@ -77,30 +89,28 @@ const queryFornecedor = z
     page: z.number().int().min(1).optional(),
     select: selectFornecedor.optional(),
   })
-  .refine(
-    (data) => {
-      return !(data.limit && !data.page);
-    },
-    {
-      message: "page is required when limit is provided",
-      path: ["page"],
-    },
-  );
+  .refine((data) => !(data.limit && !data.page), {
+    message: "page is required when limit is provided",
+    path: ["page"],
+  });
 
 const newFornecedor = z
   .object({
     cnpj: z.string(),
     name: z.string(),
-    uf: z.string(),
-    municipio: z.string(),
+    uf: z.string().optional(),
+    municipio: z.string().optional(),
   })
   .strict();
+
+const updateFornecedor = newFornecedor.partial();
 
 export {
   queryFornecedor,
   whereFornecedor,
   orderByFornecedor,
   newFornecedor,
-  aci_fornecedor,
+  updateFornecedor,
   selectFornecedor,
+  selectFornecedorFields,
 };

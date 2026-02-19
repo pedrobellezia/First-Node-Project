@@ -36,7 +36,9 @@ class Utils {
     try {
       const parser = new PDFParse({ url });
       text = (await parser.getText()).text;
-    } catch {
+    } catch (error) {
+      console.error("Erro ao ler o PDF:", error);
+
       return {
         certidao: null,
         validade: null,
@@ -116,7 +118,8 @@ class Utils {
           { text: sanitized },
           { timeout: 30_000 },
         );
-      } catch {
+      } catch (error) {
+        console.error("Erro ao chamar o serviço de análise (n8n):", error);
         return {
           certidao: null,
           validade: null,

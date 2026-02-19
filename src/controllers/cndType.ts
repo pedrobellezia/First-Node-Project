@@ -1,33 +1,40 @@
 import { prisma } from "../lib/prisma.js";
 import * as z from "zod";
-import { queryCndType } from "../schemas/cndtype.js";
+import { queryCndType } from "../schemas/cndType.js";
 import { CndType } from "@prisma/client";
 
 class CndTypeManager {
   static async newCndType(
-    uf: string | undefined,
-    municipio: string | undefined,
     tipo: string,
-    instructions: any,
+    diasRestantes: number,
   ): Promise<CndType> {
-    console.log('[CndTypeManager.newCndType] Criando novo tipo de CND:', { uf, municipio, tipo });
+    console.log("[CndTypeManager.newCndType] Criando novo tipo de CND:", {
+      tipo,
+    });
+
     const cndType = await prisma.cndType.create({
       data: {
-        uf,
         tipo,
-        ...(municipio && { municipio: municipio }),
-        ...(instructions && { instructions: instructions }),
+        diasRestantes,
       },
     });
-    console.log('[CndTypeManager.newCndType] CND criada com sucesso:', cndType);
+
+    console.log(
+      "[CndTypeManager.newCndType] Tipo de CND criado com sucesso:",
+      cndType,
+    );
     return cndType;
   }
 
-  static async getCndType(
+  static async getCndTypes(
     prop: z.infer<typeof queryCndType>,
   ): Promise<CndType[]> {
-    console.log('[CndTypeManager.getCndType] Buscando tipos de CND com filtros:', prop);
-    const cndType = await prisma.cndType.findMany({
+    console.log(
+      "[CndTypeManager.getCndTypes] Buscando tipos de CND com filtros:",
+      prop,
+    );
+
+    const cndTypes = await prisma.cndType.findMany({
       ...(prop.where && { where: prop.where }),
       ...(prop.orderBy && { orderBy: prop.orderBy }),
       ...(prop.include && { include: prop.include }),
@@ -35,8 +42,13 @@ class CndTypeManager {
       ...(prop.page && { skip: (prop.page - 1) * prop.limit! }),
       ...(prop.select && { select: prop.select }),
     });
-    console.log('[CndTypeManager.getCndType] Encontrados', cndType.length, 'registros');
-    return cndType;
+
+    console.log(
+      "[CndTypeManager.getCndTypes] Encontrados",
+      cndTypes.length,
+      "registros",
+    );
+    return cndTypes;
   }
 }
 
