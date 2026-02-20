@@ -5,6 +5,7 @@ import * as z from "zod";
 import { queryCnd } from "../schemas/cnd.js";
 import { Cnd } from "@prisma/client";
 import FornecedorCategoryManager from "./fornecedorCategory.js";
+import { NotFoundError } from "../lib/error.js";
 
 class CndManager {
   static async newCnd(fornecedorCategoryId: string) {
@@ -18,7 +19,7 @@ class CndManager {
       });
 
     if (!fornecedorCategory || fornecedorCategory.length === 0) {
-      throw new Error(
+      throw new NotFoundError(
         `FornecedorCategory com id ${fornecedorCategoryId} não encontrado`,
       );
     }

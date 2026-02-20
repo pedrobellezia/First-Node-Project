@@ -2,6 +2,7 @@ import { prisma } from "../lib/prisma.js";
 import * as z from "zod";
 import { queryFornecedorCategory } from "../schemas/fornecedorCategory.js";
 import { FornecedorCategory } from "@prisma/client";
+import { ConflictError } from "../lib/error.js";
 
 class FornecedorCategoryManager {
   static async newFornecedorCategory(
@@ -11,6 +12,17 @@ class FornecedorCategoryManager {
     console.log('[FornecedorCategoryManager.newFornecedorCategory] Vinculando fornecedor à categoria:', 
       { fornecedorId, cndCategoryId });
     
+    const exist = await prisma.fornecedorCategory.findFirst({
+      where: {
+        fornecedorId,
+        cndCategoryId,
+      },
+    });
+
+    if (exist) {
+      throw new ConflictError(`Vínculo entre fornecedor e categoria de cnd já existe.`);
+    }
+
     const fornecedorCategory = await prisma.fornecedorCategory.create({
       data: {
         fornecedorId,

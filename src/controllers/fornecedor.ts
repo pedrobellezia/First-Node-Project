@@ -2,6 +2,7 @@ import { prisma } from "../lib/prisma.js";
 import * as z from "zod";
 import { queryFornecedor } from "../schemas/fornecedor.js";
 import { Fornecedor } from "@prisma/client";
+import { ConflictError } from "../lib/error.js";
 
 class FornecedorManager {
   static async newFornecedor(
@@ -9,9 +10,17 @@ class FornecedorManager {
     name: string,
     uf?: string | null,
     municipio?: string | null,
-  ): Promise<Fornecedor> {
+  ): Promise<Fornecedor> {    
     console.log('[FornecedorManager.newFornecedor] Criando novo fornecedor:', 
       { cnpj, name, uf, municipio });
+
+    const exist = await prisma.fornecedor.findFirst({
+      where: { cnpj },
+    });
+
+    if (exist) {
+      throw new ConflictError(`Fornecedor com CNPJ "${cnpj}" já existe.`);
+    }
     
     const fornecedor = await prisma.fornecedor.create({
       data: {

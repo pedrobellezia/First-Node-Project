@@ -5,6 +5,7 @@ import {
   queryFornecedorCategory,
 } from "../schemas/fornecedorCategory.js";
 import ApiResponseHandler from "../lib/response.js";
+import { BaseError } from "../lib/error.js";
 
 const fornecedorCategoryRoute = Router();
 
@@ -25,7 +26,7 @@ fornecedorCategoryRoute.post("/", async (req, res) => {
 
     ApiResponseHandler.success(res, vinculo, 201);
   } catch (error) {
-    ApiResponseHandler.internalError(res, "[POST /fornecedorCategory]", error);
+    ApiResponseHandler.trycatchHandler(res, error as BaseError);
   }
 });
 
@@ -45,7 +46,7 @@ fornecedorCategoryRoute.post("/search", async (req, res) => {
 
     ApiResponseHandler.success(res, vinculos);
   } catch (error) {
-    ApiResponseHandler.internalError(res, "[POST /fornecedorCategory/search]", error);
+    ApiResponseHandler.trycatchHandler(res, error as BaseError);
   }
 });
 
@@ -73,7 +74,7 @@ fornecedorCategoryRoute.get("/", async (req, res) => {
 
     ApiResponseHandler.success(res, vinculos);
   } catch (error) {
-    ApiResponseHandler.internalError(res, "[GET /fornecedorCategory]", error);
+    ApiResponseHandler.trycatchHandler(res, error as BaseError);
   }
 });
 
@@ -99,7 +100,7 @@ fornecedorCategoryRoute.get("/:id", async (req, res) => {
 
     ApiResponseHandler.success(res, vinculos[0]);
   } catch (error) {
-    ApiResponseHandler.internalError(res, "[GET /fornecedorCategory/:id]", error);
+    ApiResponseHandler.trycatchHandler(res, error as BaseError);
   }
 });
 

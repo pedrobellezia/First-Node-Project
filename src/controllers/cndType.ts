@@ -2,6 +2,7 @@ import { prisma } from "../lib/prisma.js";
 import * as z from "zod";
 import { queryCndType } from "../schemas/cndType.js";
 import { CndType } from "@prisma/client";
+import { ConflictError } from "../lib/error.js";
 
 class CndTypeManager {
   static async newCndType(
@@ -11,6 +12,14 @@ class CndTypeManager {
     console.log("[CndTypeManager.newCndType] Criando novo tipo de CND:", {
       tipo,
     });
+
+    const exist = await prisma.cndType.findFirst({
+      where: { tipo },
+    });
+
+    if (exist) {
+      throw new ConflictError(`Tipo de CND "${tipo}" já existe.`);
+    }
 
     const cndType = await prisma.cndType.create({
       data: {

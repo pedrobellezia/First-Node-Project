@@ -2,6 +2,7 @@ import { Router } from "express";
 import CndManager from "../controllers/cnd.js";
 import { newCnd, queryCnd } from "../schemas/cnd.js";
 import ApiResponseHandler from "../lib/response.js";
+import { BaseError } from "../lib/error.js";
 
 const cndRoute = Router();
 
@@ -19,7 +20,7 @@ cndRoute.post("/", async (req, res) => {
 
     ApiResponseHandler.success(res, cnd, 201);
   } catch (error) {
-    ApiResponseHandler.internalError(res, "[POST /cnd]", error);
+    ApiResponseHandler.trycatchHandler(res, error as BaseError);
   }
 });
 
@@ -37,7 +38,7 @@ cndRoute.post("/search", async (req, res) => {
 
     ApiResponseHandler.success(res, cnds);
   } catch (error) {
-    ApiResponseHandler.internalError(res, "[POST /cnd/search]", error);
+    ApiResponseHandler.trycatchHandler(res, error as BaseError);
   }
 });
 
@@ -69,7 +70,7 @@ cndRoute.get("/", async (req, res) => {
 
     ApiResponseHandler.success(res, cnds);
   } catch (error) {
-    ApiResponseHandler.internalError(res, "[GET /cnd]", error);
+    ApiResponseHandler.trycatchHandler(res, error as BaseError);
   }
 });
 
@@ -97,7 +98,7 @@ cndRoute.get("/:id", async (req, res) => {
 
     ApiResponseHandler.success(res, cnds[0]);
   } catch (error) {
-    ApiResponseHandler.internalError(res, "[GET /cnd/:id]", error);
+    ApiResponseHandler.trycatchHandler(res, error as BaseError);
   }
 });
 

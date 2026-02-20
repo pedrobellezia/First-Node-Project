@@ -2,6 +2,7 @@ import { Router } from "express";
 import CndCategoryManager from "../controllers/cndCategory.js";
 import { newCndCategory, queryCndCategory } from "../schemas/cndCategory.js";
 import ApiResponseHandler from "../lib/response.js";
+import { BaseError } from "../lib/error.js";
 
 const cndCategoryRoute = Router();
 
@@ -24,7 +25,7 @@ cndCategoryRoute.post("/", async (req, res) => {
 
     ApiResponseHandler.success(res, cndCategory, 201);
   } catch (error) {
-    ApiResponseHandler.internalError(res, "[POST /cndCategory]", error);
+    ApiResponseHandler.trycatchHandler(res, error as BaseError);
   }
 });
 
@@ -42,7 +43,7 @@ cndCategoryRoute.post("/search", async (req, res) => {
 
     ApiResponseHandler.success(res, cndCategories);
   } catch (error) {
-    ApiResponseHandler.internalError(res, "[POST /cndCategory/search]", error);
+    ApiResponseHandler.trycatchHandler(res, error as BaseError);
   }
 });
 
@@ -64,8 +65,7 @@ cndCategoryRoute.get("/", async (req, res) => {
 
     ApiResponseHandler.success(res, cndCategories);
   } catch (error) {
-
-    ApiResponseHandler.internalError(res, "[GET /cndCategory]", error);
+    ApiResponseHandler.trycatchHandler(res, error as BaseError);  
   }
 });
 
@@ -86,7 +86,7 @@ cndCategoryRoute.get("/:id", async (req, res) => {
 
     ApiResponseHandler.success(res, cndCategories[0]);
   } catch (error) {
-    ApiResponseHandler.internalError(res, "[GET /cndCategory/:id]", error);
+    ApiResponseHandler.trycatchHandler(res, error as BaseError);
   }
 });
 

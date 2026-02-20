@@ -1,5 +1,6 @@
 import { Response } from "express";
 import { ZodError } from "zod";
+import { BaseError } from "./error.js";
 
 interface ApiResponse<T = any> {
   success: boolean;
@@ -15,6 +16,20 @@ class ApiResponseHandler {
       success: true,
       data,
     } as ApiResponse<T>);
+  }
+
+  static trycatchHandler(res: Response, error: BaseError) {
+    switch (error.name) {
+      case "ConflictError":
+        this.conflict(res, error.message);
+        break;
+      case "NotFoundError":
+        this.notFound(res, error.message);
+        break;
+      default:
+        this.internalError(res, "Unhandled error", error);
+        break;
+    }
   }
 
   // Retorna uma resposta de erro com detalhes
@@ -63,7 +78,6 @@ class ApiResponseHandler {
     } as ApiResponse);
   }
 
-  
   // Retorna erro de recurso não encontrado
 
   static notFound(res: Response, resource: string = "Recurso"): void {
@@ -73,7 +87,6 @@ class ApiResponseHandler {
     } as ApiResponse);
   }
 
-  
   // Retorna erro de conflito (ex: CNPJ duplicado)
 
   static conflict(res: Response, error: string): void {
@@ -83,7 +96,6 @@ class ApiResponseHandler {
     } as ApiResponse);
   }
 
-  
   // Retorna erro de recurso proibido
 
   static forbidden(res: Response, error: string): void {

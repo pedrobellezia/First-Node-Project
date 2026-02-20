@@ -2,6 +2,7 @@ import { Router } from "express";
 import FornecedorManager from "../controllers/fornecedor.js";
 import { newFornecedor, queryFornecedor } from "../schemas/fornecedor.js";
 import ApiResponseHandler from "../lib/response.js";
+import { BaseError } from "../lib/error.js";
 
 const fornecedorRoute = Router();
 
@@ -24,7 +25,7 @@ fornecedorRoute.post("/", async (req, res) => {
     
     ApiResponseHandler.success(res, fornecedor, 201);
   } catch (error) {
-    ApiResponseHandler.internalError(res, "[POST /fornecedor]", error);
+    ApiResponseHandler.trycatchHandler(res, error as BaseError);
   }
 });
 
@@ -42,7 +43,7 @@ fornecedorRoute.post("/search", async (req, res) => {
 
     ApiResponseHandler.success(res, fornecedores);
   } catch (error) {
-    ApiResponseHandler.internalError(res, "[POST /fornecedor/search]", error);
+    ApiResponseHandler.trycatchHandler(res, error as BaseError);
   }
 });
 
@@ -62,7 +63,7 @@ fornecedorRoute.get("/", async (req, res) => {
 
     ApiResponseHandler.success(res, fornecedores);
   } catch (error) {
-    ApiResponseHandler.internalError(res, "[GET /fornecedor]", error);
+    ApiResponseHandler.trycatchHandler(res, error as BaseError);
   }
 });
 
@@ -82,7 +83,7 @@ fornecedorRoute.get("/:id", async (req, res) => {
 
     ApiResponseHandler.success(res, fornecedores[0]);
   } catch (error) {
-    ApiResponseHandler.internalError(res, "[GET /fornecedor/:id]", error);
+    ApiResponseHandler.trycatchHandler(res, error as BaseError);
   }
 });
 
