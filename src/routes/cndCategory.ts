@@ -1,6 +1,7 @@
 import { Router } from "express";
 import CndCategoryManager from "../controllers/cndCategory.js";
 import { newCndCategory, queryCndCategory } from "../schemas/cndCategory.js";
+import ApiResponseHandler from "../lib/response.js";
 
 const cndCategoryRoute = Router();
 
@@ -10,11 +11,7 @@ cndCategoryRoute.post("/", async (req, res) => {
     const data = await newCndCategory.safeParseAsync(req.body);
 
     if (!data.success) {
-      res.status(400).json({
-        success: false,
-        error: "Dados inválidos",
-        details: data.error.issues,
-      });
+      ApiResponseHandler.validationError(res, data.error);
       return;
     }
 
@@ -25,16 +22,9 @@ cndCategoryRoute.post("/", async (req, res) => {
       data.data.instructions,
     );
 
-    res.status(201).json({
-      success: true,
-      data: cndCategory,
-    });
+    ApiResponseHandler.success(res, cndCategory, 201);
   } catch (error) {
-    console.error("[POST /cndCategory] Erro ao criar categoria:", error);
-    res.status(500).json({
-      success: false,
-      error: "Erro interno do servidor",
-    });
+    ApiResponseHandler.internalError(res, "[POST /cndCategory]", error);
   }
 });
 
@@ -44,27 +34,15 @@ cndCategoryRoute.post("/search", async (req, res) => {
     const data = await queryCndCategory.safeParseAsync(req.body);
 
     if (!data.success) {
-      res.status(400).json({
-        success: false,
-        error: "Filtros inválidos",
-        details: data.error.issues,
-      });
+      ApiResponseHandler.validationError(res, data.error);
       return;
     }
 
     const cndCategories = await CndCategoryManager.getCndCategories(data.data);
 
-    res.json({
-      success: true,
-      data: cndCategories,
-      count: cndCategories.length,
-    });
+    ApiResponseHandler.success(res, cndCategories);
   } catch (error) {
-    console.error("[POST /cndCategory/search] Erro na busca:", error);
-    res.status(500).json({
-      success: false,
-      error: "Erro interno do servidor",
-    });
+    ApiResponseHandler.internalError(res, "[POST /cndCategory/search]", error);
   }
 });
 
@@ -84,17 +62,10 @@ cndCategoryRoute.get("/", async (req, res) => {
       include: { cndType: true },
     });
 
-    res.json({
-      success: true,
-      data: cndCategories,
-      count: cndCategories.length,
-    });
+    ApiResponseHandler.success(res, cndCategories);
   } catch (error) {
-    console.error("[GET /cndCategory] Erro ao listar:", error);
-    res.status(500).json({
-      success: false,
-      error: "Erro interno do servidor",
-    });
+
+    ApiResponseHandler.internalError(res, "[GET /cndCategory]", error);
   }
 });
 
@@ -109,23 +80,13 @@ cndCategoryRoute.get("/:id", async (req, res) => {
     });
 
     if (cndCategories.length === 0) {
-      res.status(404).json({
-        success: false,
-        error: "Categoria de CND não encontrada",
-      });
+      ApiResponseHandler.notFound(res, "Categoria de CND");
       return;
     }
 
-    res.json({
-      success: true,
-      data: cndCategories[0],
-    });
+    ApiResponseHandler.success(res, cndCategories[0]);
   } catch (error) {
-    console.error("[GET /cndCategory/:id] Erro ao buscar:", error);
-    res.status(500).json({
-      success: false,
-      error: "Erro interno do servidor",
-    });
+    ApiResponseHandler.internalError(res, "[GET /cndCategory/:id]", error);
   }
 });
 

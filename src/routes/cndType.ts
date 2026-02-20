@@ -1,35 +1,25 @@
 import { Router } from "express";
 import CndTypeManager from "../controllers/cndType.js";
 import { newCndType, queryCndType } from "../schemas/cndType.js";
+import ApiResponseHandler from "../lib/response.js";
 
 const cndTypeRoute = Router();
 
-// new
+// POST / - Criar novo tipo de CND
 cndTypeRoute.post("/", async (req, res) => {
   try {
     const data = await newCndType.safeParseAsync(req.body);
 
     if (!data.success) {
-      res.status(400).json({
-        success: false,
-        error: "Dados inválidos",
-        details: data.error.issues,
-      });
+      ApiResponseHandler.validationError(res, data.error);
       return;
     }
 
     const cndType = await CndTypeManager.newCndType(data.data.tipo, data.data.diasRestantes);
 
-    res.status(201).json({
-      success: true,
-      data: cndType,
-    });
+    ApiResponseHandler.success(res, cndType, 201);
   } catch (error) {
-    console.error("[POST /cndType] Erro ao criar tipo:", error);
-    res.status(500).json({
-      success: false,
-      error: "Erro interno do servidor",
-    });
+    ApiResponseHandler.internalError(res, "[POST /cndType]", error);
   }
 });
 
@@ -38,27 +28,15 @@ cndTypeRoute.post("/search", async (req, res) => {
     const data = await queryCndType.safeParseAsync(req.body);
 
     if (!data.success) {
-      res.status(400).json({
-        success: false,
-        error: "Filtros inválidos",
-        details: data.error.issues,
-      });
+      ApiResponseHandler.validationError(res, data.error);
       return;
     }
 
     const cndTypes = await CndTypeManager.getCndTypes(data.data);
 
-    res.json({
-      success: true,
-      data: cndTypes,
-      count: cndTypes.length,
-    });
+    ApiResponseHandler.success(res, cndTypes);
   } catch (error) {
-    console.error("[POST /cndType/search] Erro na busca:", error);
-    res.status(500).json({
-      success: false,
-      error: "Erro interno do servidor",
-    });
+    ApiResponseHandler.internalError(res, "[POST /cndType/search]", error);
   }
 });
 
@@ -72,17 +50,9 @@ cndTypeRoute.get("/", async (req, res) => {
 
     const cndTypes = await CndTypeManager.getCndTypes({ where });
 
-    res.json({
-      success: true,
-      data: cndTypes,
-      count: cndTypes.length,
-    });
+    ApiResponseHandler.success(res, cndTypes);
   } catch (error) {
-    console.error("[GET /cndType] Erro ao listar:", error);
-    res.status(500).json({
-      success: false,
-      error: "Erro interno do servidor",
-    });
+    ApiResponseHandler.internalError(res, "[GET /cndType]", error);
   }
 });
 
@@ -95,23 +65,13 @@ cndTypeRoute.get("/:id", async (req, res) => {
     });
 
     if (cndTypes.length === 0) {
-      res.status(404).json({
-        success: false,
-        error: "Tipo de CND não encontrado",
-      });
+      ApiResponseHandler.notFound(res, "Tipo de CND");
       return;
     }
 
-    res.json({
-      success: true,
-      data: cndTypes[0],
-    });
+    ApiResponseHandler.success(res, cndTypes[0]);
   } catch (error) {
-    console.error("[GET /cndType/:id] Erro ao buscar:", error);
-    res.status(500).json({
-      success: false,
-      error: "Erro interno do servidor",
-    });
+    ApiResponseHandler.internalError(res, "[GET /cndType/:id]", error);
   }
 });
 export default cndTypeRoute;

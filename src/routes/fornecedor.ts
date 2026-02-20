@@ -1,6 +1,7 @@
 import { Router } from "express";
 import FornecedorManager from "../controllers/fornecedor.js";
 import { newFornecedor, queryFornecedor } from "../schemas/fornecedor.js";
+import ApiResponseHandler from "../lib/response.js";
 
 const fornecedorRoute = Router();
 
@@ -10,11 +11,7 @@ fornecedorRoute.post("/", async (req, res) => {
     const data = await newFornecedor.safeParseAsync(req.body);
     
     if (!data.success) {
-      res.status(400).json({
-        success: false,
-        error: "Dados inválidos",
-        details: data.error.issues
-      });
+      ApiResponseHandler.validationError(res, data.error);
       return;
     }
 
@@ -25,16 +22,9 @@ fornecedorRoute.post("/", async (req, res) => {
       data.data.municipio
     );
     
-    res.status(201).json({
-      success: true,
-      data: fornecedor
-    });
+    ApiResponseHandler.success(res, fornecedor, 201);
   } catch (error) {
-    console.error("[POST /fornecedor] Erro ao criar fornecedor:", error);
-    res.status(500).json({
-      success: false,
-      error: "Erro interno do servidor"
-    });
+    ApiResponseHandler.internalError(res, "[POST /fornecedor]", error);
   }
 });
 
@@ -44,27 +34,15 @@ fornecedorRoute.post("/search", async (req, res) => {
     const data = await queryFornecedor.safeParseAsync(req.body);
 
     if (!data.success) {
-      res.status(400).json({
-        success: false,
-        error: "Filtros inválidos",
-        details: data.error.issues
-      });
+      ApiResponseHandler.validationError(res, data.error);
       return;
     }
 
     const fornecedores = await FornecedorManager.getFornecedores(data.data);
 
-    res.json({
-      success: true,
-      data: fornecedores,
-      count: fornecedores.length
-    });
+    ApiResponseHandler.success(res, fornecedores);
   } catch (error) {
-    console.error("[POST /fornecedor/search] Erro na busca:", error);
-    res.status(500).json({
-      success: false,
-      error: "Erro interno do servidor"
-    });
+    ApiResponseHandler.internalError(res, "[POST /fornecedor/search]", error);
   }
 });
 
@@ -82,17 +60,9 @@ fornecedorRoute.get("/", async (req, res) => {
 
     const fornecedores = await FornecedorManager.getFornecedores({ where });
 
-    res.json({
-      success: true,
-      data: fornecedores,
-      count: fornecedores.length
-    });
+    ApiResponseHandler.success(res, fornecedores);
   } catch (error) {
-    console.error("[GET /fornecedor] Erro ao listar:", error);
-    res.status(500).json({
-      success: false,
-      error: "Erro interno do servidor"
-    });
+    ApiResponseHandler.internalError(res, "[GET /fornecedor]", error);
   }
 });
 
@@ -106,23 +76,13 @@ fornecedorRoute.get("/:id", async (req, res) => {
     });
     
     if (fornecedores.length === 0) {
-      res.status(404).json({
-        success: false,
-        error: "Fornecedor não encontrado"
-      });
+      ApiResponseHandler.notFound(res, "Fornecedor");
       return;
     }
 
-    res.json({
-      success: true,
-      data: fornecedores[0]
-    });
+    ApiResponseHandler.success(res, fornecedores[0]);
   } catch (error) {
-    console.error("[GET /fornecedor/:id] Erro ao buscar:", error);
-    res.status(500).json({
-      success: false,
-      error: "Erro interno do servidor"
-    });
+    ApiResponseHandler.internalError(res, "[GET /fornecedor/:id]", error);
   }
 });
 

@@ -4,6 +4,7 @@ import axios from "axios";
 type CertidaoResult = {
   certidao: boolean | null;
   validade: string | null;
+  emissao?: string | null;
   detail?: string;
 };
 
@@ -111,6 +112,7 @@ class Utils {
     return {
       certidao: typeof data.certidao === "boolean" ? data.certidao : null,
       validade: typeof data.validade === "string" ? data.validade : null,
+      emissao: typeof data.emissao === "string" ? data.emissao : null,
       ...(data.certidao === null && {
         detail: "Não foi possível determinar a situação da certidão",
       }),

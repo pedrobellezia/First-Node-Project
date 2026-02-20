@@ -8,7 +8,7 @@ import {
 
 const whereCndCategory = z
   .object({
-    ativo: z.boolean().default(true).optional(),
+    ativo: z.boolean().optional(),
     uf: z.string().optional(),
     municipio: z.string().optional(),
     cndTypeId: z.string().optional(),
@@ -44,6 +44,7 @@ const includeCndCategory = z.object({
 
 const selectCndCategoryFields = {
   id: z.boolean().optional(),
+  name: z.boolean().optional(),
   uf: z.boolean().optional(),
   municipio: z.boolean().optional(),
   cndTypeId: z.boolean().optional(),

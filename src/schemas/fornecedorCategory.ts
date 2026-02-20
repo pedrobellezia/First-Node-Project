@@ -5,7 +5,7 @@ import { selectCnd, whereCnd, orderByCnd } from "./cnd.js";
 
 const whereFornecedorCategory = z
   .object({
-    ativo: z.boolean().default(true).optional(),
+    ativo: z.boolean().optional(),
     fornecedorId: z.string().optional(),
     cndCategoryId: z.string().optional(),
     id: z.string().optional(),

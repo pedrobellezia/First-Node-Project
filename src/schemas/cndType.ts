@@ -4,7 +4,7 @@ import { selectFornecedorCategory } from "./fornecedorCategory.js";
 
 const whereCndType = z
   .object({
-    ativo: z.boolean().default(true).optional(),
+    ativo: z.boolean().optional(),
     tipo: z.string().optional(),
     id: z.string().optional(),
   })

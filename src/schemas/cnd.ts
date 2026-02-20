@@ -8,7 +8,7 @@ const whereCnd = z
     file_name: z.string().optional(),
     validade: z.date().optional(),
     vencido: z.boolean().optional(),
-    ativo: z.boolean().default(true).optional(),
+    ativo: z.boolean().optional(),
   })
   .strict();
 

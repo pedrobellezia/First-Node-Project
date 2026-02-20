@@ -90,6 +90,8 @@ class CndManager {
     console.log(
       "[FornecedorCndsManager.newCnd] Validações passaram. Validade:",
       result.validade,
+      "Emissão:",
+      result.emissao,
     );
 
     let validadeDate: Date;
@@ -102,13 +104,33 @@ class CndManager {
       validadeDate = new Date(result.validade);
     }
 
-    console.log("[FornecedorCndsManager.newCnd] Data formatada:", validadeDate);
+    let emissaoDate: Date;
+    if (result.emissao) {
+      if (result.emissao.includes("/")) {
+        // Formato dd/mm/yyyy
+        const [dia, mes, ano] = result.emissao.split("/");
+        emissaoDate = new Date(`${ano}-${mes}-${dia}`);
+      } else {
+        // Formato ISO yyyy-mm-dd
+        emissaoDate = new Date(result.emissao);
+      }
+    } else {
+      emissaoDate = new Date();
+    }
+
+    console.log(
+      "[FornecedorCndsManager.newCnd] Datas formatadas - Validade:",
+      validadeDate,
+      "Emissão:",
+      emissaoDate,
+    );
 
     const createdCnd = await prisma.cnd.create({
       data: {
         fornecedorCategoryId,
         file_name,
         validade: validadeDate,
+        emissao: emissaoDate,
         negativa: result.certidao,
       },
     });

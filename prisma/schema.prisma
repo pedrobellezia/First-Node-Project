@@ -32,6 +32,7 @@ model CndType {
 
 model CndCategory {
   id             String          @id @default(uuid())
+  name           String?
   uf             String?
   municipio      String?
   cndTypeId      String          
@@ -63,6 +64,7 @@ model Cnd {
   fornecedorCategoryId    String   
   file_name               String
   validade                DateTime @db.Date
+  emissao                 DateTime? @db.Date
   negativa                Boolean
   ativo                   Boolean  @default(true)
   createdAt               DateTime @default(now()) @db.Timestamp(6)

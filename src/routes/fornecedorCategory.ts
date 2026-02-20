@@ -4,6 +4,7 @@ import {
   newFornecedorCategory,
   queryFornecedorCategory,
 } from "../schemas/fornecedorCategory.js";
+import ApiResponseHandler from "../lib/response.js";
 
 const fornecedorCategoryRoute = Router();
 
@@ -13,11 +14,7 @@ fornecedorCategoryRoute.post("/", async (req, res) => {
     const data = await newFornecedorCategory.safeParseAsync(req.body);
 
     if (!data.success) {
-      res.status(400).json({
-        success: false,
-        error: "Dados inválidos",
-        details: data.error.issues,
-      });
+      ApiResponseHandler.validationError(res, data.error);
       return;
     }
 
@@ -26,16 +23,9 @@ fornecedorCategoryRoute.post("/", async (req, res) => {
       data.data.cndCategoryId,
     );
 
-    res.status(201).json({
-      success: true,
-      data: vinculo,
-    });
+    ApiResponseHandler.success(res, vinculo, 201);
   } catch (error) {
-    console.error("[POST /] Erro ao criar vínculo:", error);
-    res.status(500).json({
-      success: false,
-      error: "Erro interno do servidor",
-    });
+    ApiResponseHandler.internalError(res, "[POST /fornecedorCategory]", error);
   }
 });
 
@@ -45,11 +35,7 @@ fornecedorCategoryRoute.post("/search", async (req, res) => {
     const data = await queryFornecedorCategory.safeParseAsync(req.body);
 
     if (!data.success) {
-      res.status(400).json({
-        success: false,
-        error: "Filtros inválidos",
-        details: data.error.issues,
-      });
+      ApiResponseHandler.validationError(res, data.error);
       return;
     }
 
@@ -57,17 +43,9 @@ fornecedorCategoryRoute.post("/search", async (req, res) => {
       data.data,
     );
 
-    res.json({
-      success: true,
-      data: vinculos,
-      count: vinculos.length,
-    });
+    ApiResponseHandler.success(res, vinculos);
   } catch (error) {
-    console.error("[POST /search] Erro na busca:", error);
-    res.status(500).json({
-      success: false,
-      error: "Erro interno do servidor",
-    });
+    ApiResponseHandler.internalError(res, "[POST /fornecedorCategory/search]", error);
   }
 });
 
@@ -93,17 +71,9 @@ fornecedorCategoryRoute.get("/", async (req, res) => {
       },
     });
 
-    res.json({
-      success: true,
-      data: vinculos,
-      count: vinculos.length,
-    });
+    ApiResponseHandler.success(res, vinculos);
   } catch (error) {
-    console.error("[GET /] Erro ao listar:", error);
-    res.status(500).json({
-      success: false,
-      error: "Erro interno do servidor",
-    });
+    ApiResponseHandler.internalError(res, "[GET /fornecedorCategory]", error);
   }
 });
 
@@ -123,23 +93,13 @@ fornecedorCategoryRoute.get("/:id", async (req, res) => {
     });
 
     if (vinculos.length === 0) {
-      res.status(404).json({
-        success: false,
-        error: "Vínculo não encontrado",
-      });
+      ApiResponseHandler.notFound(res, "Vínculo");
       return;
     }
 
-    res.json({
-      success: true,
-      data: vinculos[0],
-    });
+    ApiResponseHandler.success(res, vinculos[0]);
   } catch (error) {
-    console.error("[GET /:id] Erro ao buscar vínculo:", error);
-    res.status(500).json({
-      success: false,
-      error: "Erro interno do servidor",
-    });
+    ApiResponseHandler.internalError(res, "[GET /fornecedorCategory/:id]", error);
   }
 });
 

@@ -5,11 +5,17 @@ import {
   whereFornecedorCategory,
   orderByFornecedorCategory,
 } from "./fornecedorCategory.js";
+import { cnpj } from "cpf-cnpj-validator";
 
 const whereFornecedor = z
   .object({
-    ativo: z.boolean().default(true).optional(),
-    cnpj: z.string().optional(),
+    ativo: z.boolean().optional(),
+    cnpj: z
+      .string()
+      .refine((cnpjT) => cnpj.isValid(cnpjT), {
+        message: "CNPJ inválido",
+      })
+      .optional(),
     name: z.string().optional(),
     uf: z.string().optional(),
     municipio: z.string().optional(),
@@ -96,7 +102,9 @@ const queryFornecedor = z
 
 const newFornecedor = z
   .object({
-    cnpj: z.string(),
+    cnpj: z.string().refine((cnpjT) => cnpj.isValid(cnpjT), {
+      message: "CNPJ inválido",
+    }),
     name: z.string(),
     uf: z.string().optional(),
     municipio: z.string().optional(),

@@ -1,6 +1,7 @@
 import { Router } from "express";
 import CndManager from "../controllers/cnd.js";
 import { newCnd, queryCnd } from "../schemas/cnd.js";
+import ApiResponseHandler from "../lib/response.js";
 
 const cndRoute = Router();
 
@@ -10,26 +11,15 @@ cndRoute.post("/", async (req, res) => {
     const data = await newCnd.safeParseAsync(req.body);
 
     if (!data.success) {
-      res.status(400).json({
-        success: false,
-        error: "Dados inválidos",
-        details: data.error.issues,
-      });
+      ApiResponseHandler.validationError(res, data.error);
       return;
     }
 
     const cnd = await CndManager.newCnd(data.data.fornecedorCategoryId);
 
-    res.status(201).json({
-      success: true,
-      data: cnd,
-    });
+    ApiResponseHandler.success(res, cnd, 201);
   } catch (error) {
-    console.error("[POST /cnd] Erro ao criar CND:", error);
-    res.status(500).json({
-      success: false,
-      error: "Erro interno do servidor",
-    });
+    ApiResponseHandler.internalError(res, "[POST /cnd]", error);
   }
 });
 
@@ -39,27 +29,15 @@ cndRoute.post("/search", async (req, res) => {
     const data = await queryCnd.safeParseAsync(req.body);
 
     if (!data.success) {
-      res.status(400).json({
-        success: false,
-        error: "Filtros inválidos",
-        details: data.error.issues,
-      });
+      ApiResponseHandler.validationError(res, data.error);
       return;
     }
 
     const cnds = await CndManager.getCnd(data.data);
 
-    res.json({
-      success: true,
-      data: cnds,
-      count: cnds.length,
-    });
+    ApiResponseHandler.success(res, cnds);
   } catch (error) {
-    console.error("[POST /cnd/search] Erro na busca:", error);
-    res.status(500).json({
-      success: false,
-      error: "Erro interno do servidor",
-    });
+    ApiResponseHandler.internalError(res, "[POST /cnd/search]", error);
   }
 });
 
@@ -89,17 +67,9 @@ cndRoute.get("/", async (req, res) => {
       },
     });
 
-    res.json({
-      success: true,
-      data: cnds,
-      count: cnds.length,
-    });
+    ApiResponseHandler.success(res, cnds);
   } catch (error) {
-    console.error("[GET /cnd] Erro ao listar:", error);
-    res.status(500).json({
-      success: false,
-      error: "Erro interno do servidor",
-    });
+    ApiResponseHandler.internalError(res, "[GET /cnd]", error);
   }
 });
 
@@ -121,23 +91,13 @@ cndRoute.get("/:id", async (req, res) => {
     });
 
     if (cnds.length === 0) {
-      res.status(404).json({
-        success: false,
-        error: "CND não encontrada",
-      });
+      ApiResponseHandler.notFound(res, "CND");
       return;
     }
 
-    res.json({
-      success: true,
-      data: cnds[0],
-    });
+    ApiResponseHandler.success(res, cnds[0]);
   } catch (error) {
-    console.error("[GET /cnd/:id] Erro ao buscar:", error);
-    res.status(500).json({
-      success: false,
-      error: "Erro interno do servidor",
-    });
+    ApiResponseHandler.internalError(res, "[GET /cnd/:id]", error);
   }
 });
 
