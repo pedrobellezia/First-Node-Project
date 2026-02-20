@@ -6,6 +6,7 @@ import cndCategoryRoute from "./routes/cndCategory.js";
 import fornecedorCategoryRoute from "./routes/fornecedorCategory.js";
 
 import cors from "cors";
+import customRoute from "./routes/custom.js";
 
 var app = express();
 app.use(express.json());
@@ -28,5 +29,6 @@ app.use("/cndtype", cndtypeRoute);
 app.use("/cnd", cndRoute);
 app.use("/cndcategory", cndCategoryRoute);
 app.use("/fornecedorcategory", fornecedorCategoryRoute);
+app.use("", customRoute);
 
 export default app;
