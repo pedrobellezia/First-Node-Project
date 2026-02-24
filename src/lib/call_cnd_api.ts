@@ -45,9 +45,9 @@ async function getCndfromApi(cnpj: string, rawInstructions: string) {
 
       const response = await api.post("/execute_scrap", instructions);
 
-      const { files_saved } = response.data;
+      const { files_saved } = response.data.data;
 
-      if (!files_saved?.length) {
+      if (!files_saved?.length) { 
         throw new Error("No files returned by API");
       }
 
@@ -66,9 +66,9 @@ async function getCndfromApi(cnpj: string, rawInstructions: string) {
       };
     } catch (error: any) {
       console.warn(
-        `[CND] Attempt ${attempt}/${maxAttempts} failed.`,
-        error.response ? `Status: ${error.response.status}` : error.message,
+        `[CND] Attempt ${attempt}/${maxAttempts} failed.`        
       );
+      console.log(error);
 
       if (attempt === maxAttempts) {
         if (error.response) {
