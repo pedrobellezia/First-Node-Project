@@ -65,10 +65,10 @@ async function getCndfromApi(cnpj: string, rawInstructions: string) {
         },
       };
     } catch (error: any) {
-      console.warn(
-        `[CND] Attempt ${attempt}/${maxAttempts} failed.`        
-      );
-      console.log(error);
+      const errMsg = error?.response
+        ? `Status ${error.response.status}: ${JSON.stringify(error.response.data)}`
+        : error?.message ?? String(error);
+      console.warn(`[CND] Attempt ${attempt}/${maxAttempts} failed. ${errMsg}`);
 
       if (attempt === maxAttempts) {
         if (error.response) {
