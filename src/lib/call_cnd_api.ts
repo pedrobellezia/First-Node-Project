@@ -35,7 +35,7 @@ async function downloadPdf(pdfPath: string): Promise<string> {
 }
 
 async function getCndfromApi(cnpj: string, rawInstructions: string) {
-  const maxAttempts = 3;
+  const maxAttempts = 2;
 
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {

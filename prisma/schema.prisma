@@ -7,69 +7,67 @@ datasource db {
 }
 
 model Fornecedor {
-  id             String               @id @default(uuid())
-  cnpj           String               @unique
-  name           String
-  uf             String?
-  municipio      String?
-  ativo          Boolean              @default(true)
-  createdAt      DateTime             @default(now()) @db.Timestamp(6)
-  
+  id        String   @id @default(uuid())
+  cnpj      String   @unique
+  name      String
+  uf        String?
+  municipio String?
+  ativo     Boolean  @default(true)
+  createdAt DateTime @default(now()) @db.Timestamp(6)
+
   // Relations
-  categories     FornecedorCategory[]
+  categories FornecedorCategory[]
 }
 
 model CndType {
-  id             String          @id @default(uuid())
-  tipo           String
-  ativo          Boolean         @default(true)
-  diasRestantes  Int
-  createdAt      DateTime        @default(now()) @db.Timestamp(6)
-  
+  id            String   @id @default(uuid())
+  tipo          String
+  ativo         Boolean  @default(true)
+  diasRestantes Int
+  createdAt     DateTime @default(now()) @db.Timestamp(6)
+
   // Relations
-  categories     CndCategory[]
+  categories CndCategory[]
 }
 
 model CndCategory {
-  id             String          @id @default(uuid())
-  name           String?
-  uf             String?
-  municipio      String?
-  cndTypeId      String          
-  instructions   Json
-  ativo          Boolean         @default(true)
-  createdAt      DateTime        @default(now()) @db.Timestamp(6)
-  
+  id           String   @id @default(uuid())
+  name         String?
+  uf           String?
+  municipio    String?
+  cndTypeId    String
+  instructions Json
+  ativo        Boolean  @default(true)
+  createdAt    DateTime @default(now()) @db.Timestamp(6)
+
   // Relations
-  cndType        CndType         @relation(fields: [cndTypeId], references: [id])
-  fornecedores   FornecedorCategory[]
+  cndType      CndType              @relation(fields: [cndTypeId], references: [id])
+  fornecedores FornecedorCategory[]
 }
 
 model FornecedorCategory {
-  id              String          @id @default(uuid())
-  fornecedorId    String          
-  cndCategoryId   String          
-  ativo           Boolean         @default(true)
-  createdAt       DateTime        @default(now()) @db.Timestamp(6)
-  
+  id            String   @id @default(uuid())
+  fornecedorId  String
+  cndCategoryId String
+  ativo         Boolean  @default(true)
+  createdAt     DateTime @default(now()) @db.Timestamp(6)
+
   // Relations
-  fornecedor      Fornecedor      @relation(fields: [fornecedorId], references: [id])
-  cndCategory     CndCategory     @relation(fields: [cndCategoryId], references: [id])
-  cnds            Cnd[]
-  
+  fornecedor  Fornecedor  @relation(fields: [fornecedorId], references: [id])
+  cndCategory CndCategory @relation(fields: [cndCategoryId], references: [id])
+  cnd         Cnd[]
 }
 
 model Cnd {
-  id                      String   @id @default(uuid())
-  fornecedorCategoryId    String   
-  file_name               String
-  validade                DateTime @db.Date
-  emissao                 DateTime? @db.Date
-  negativa                Boolean
-  ativo                   Boolean  @default(true)
-  createdAt               DateTime @default(now()) @db.Timestamp(6)
-  
+  id                   String    @id @default(uuid())
+  fornecedorCategoryId String
+  file_name            String
+  validade             DateTime  @db.Date
+  emissao              DateTime? @db.Date
+  negativa             Boolean
+  ativo                Boolean   @default(true)
+  createdAt            DateTime  @default(now()) @db.Timestamp(6)
+
   // Relations
-  fornecedorCategory      FornecedorCategory @relation(fields: [fornecedorCategoryId], references: [id])
-  
+  fornecedorCategory FornecedorCategory @relation(fields: [fornecedorCategoryId], references: [id])
 }

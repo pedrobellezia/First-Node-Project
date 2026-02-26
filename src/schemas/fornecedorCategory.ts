@@ -1,5 +1,5 @@
 import * as z from "zod";
-import { selectFornecedor } from "./fornecedor.js";
+import { selectFornecedor, whereFornecedor } from "./fornecedor.js";
 import { queryCndCategory, selectCndCategory } from "./cndCategory.js";
 import { selectCnd, whereCnd, orderByCnd } from "./cnd.js";
 
@@ -18,7 +18,9 @@ const orderByFornecedorCategory = z.object({
 });
 
 const includeFornecedorCategory = z.object({
-  fornecedor: z.boolean().optional(),
+  fornecedor: z.union([z.boolean(), z.object({
+    where: z.lazy(() => whereFornecedor).optional()
+  })]),
   // fiz de preguiça olhar isso aqui depois
   cndCategory: z
     .union([z.boolean(), z.object({ include: { cndType: z.boolean() } })])
