@@ -21,12 +21,13 @@ services:
     container_name: cnd-api
     build: .
     ports:
-      - "3000:3000"
+      - "3030:3030"
     environment:
       DATABASE_URL: postgresql://postgres:postgres@db:5432/cnd_db
       CND_API_URL: ${CND_API_URL}
       CAPTCHA_API_KEY: ${CAPTCHA_API_KEY}
       N8N_WEBHOOK_URL: ${N8N_WEBHOOK_URL}
+      PORT: ${PORT}
     depends_on:
       db:
         condition: service_healthy
